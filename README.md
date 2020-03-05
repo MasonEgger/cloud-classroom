@@ -4,6 +4,8 @@ DO in the classroom. This tool aims to be an API Proxy between the DO
 Infrastructure and students to give the teacher/professor more control of the 
 resources students use.
 
+## This is in Development/Alpha phase and has no guarantee to work
+
 # Issues this solves
 * Removes the need for every student to have an account to use the resources
    * Collegiate - Not all students have credit cards. This could be a barrier
