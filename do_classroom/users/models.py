@@ -50,6 +50,8 @@ class MyUserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, null=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=150)
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
@@ -70,7 +72,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
     def get_full_name(self):
-        return self.email
+        return "{0}, {1}".format(self.last_name, self.first_name)
 
     def get_short_name(self):
         return self.email

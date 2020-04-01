@@ -1,5 +1,4 @@
 from django.db import models
-from teachers.models import Teacher
 import string, random
 
 
@@ -11,7 +10,6 @@ def prefix_generator(size=8):
 
 
 class Class(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     destroyed_at = models.DateTimeField(null=True, blank=True)
@@ -35,4 +33,3 @@ class Class(models.Model):
 
     def __str__(self):
         return self.name
-

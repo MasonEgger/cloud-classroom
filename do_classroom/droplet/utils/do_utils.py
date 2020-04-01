@@ -1,5 +1,4 @@
-from django.contrib.auth.models import User
-from classes.models import Teacher, Class
+from teachers.models import Teacher
 from droplet.models import Droplet
 
 import digitalocean
@@ -7,11 +6,12 @@ from digitalocean.baseapi import NotFoundError
 import xkcdpass.xkcd_password as xp
 from datetime import datetime
 import time
-import os
 import crypt
 
 
 def hashpwd(pwd):
+    # TODO: This salt should be generated at install time and stored somewhere
+    # Not hardcoded
     hashed_pwd = crypt.crypt(pwd, "$6$saltsalt$")
 
     return hashed_pwd
@@ -27,8 +27,7 @@ def mkpasswd():
     return pwd.lower()
 
 
-def list_regions():
-    token = BillableAccount.objects.get(pk=1).token
+def list_regions(token):
     manager = digitalocean.Manager(token=token)
     all_regions = manager.get_all_regions()
 
@@ -40,8 +39,7 @@ def list_regions():
     return regions
 
 
-def list_sizes():
-    token = BillableAccount.objects.get(pk=1).token
+def list_sizes(token):
     manager = digitalocean.Manager(token=token)
     all_sizes = manager.get_all_sizes()
 
@@ -127,7 +125,7 @@ def add_droplet(token, class_obj, owner):
     name = (
         class_obj.prefix
         + "-"
-        + owner.user.username
+        + owner.email.replace("@", "-AT-")
         + "-"
         + str(count).zfill(3)
     )
@@ -145,7 +143,6 @@ def add_droplet(token, class_obj, owner):
     while droplet.ip_address is None:
         time.sleep(1)
         droplet.load()
-    print(droplet.ip_address)
     droplet_obj = Droplet(
         name=name,
         class_id=class_obj,
@@ -159,38 +156,7 @@ def add_droplet(token, class_obj, owner):
     droplet_obj.save()
     class_obj.droplet_count = count
     class_obj.save()
-
-
-def launch_droplets(request, class_obj):
-    user = Teacher.objects.get(user=request.user.id)
-    token = user.token
-    size = class_obj.droplet_size
-    pkgs = apt_packages(class_obj.packages)
-    user = "ubuntu"
-    expire = True
-
-    count = 0
-    while count < class_obj.droplet_count:
-        pwd = mkpasswd()
-        hashed_pwd = hashpwd(pwd)
-        data = cloud_config.format(pkgs, user, user, pwd, expire)
-        name = class_obj.prefix + "-" + str(count + 1).zfill(3)
-        print(class_obj.droplet_size)
-        droplet = digitalocean.Droplet(
-            token=token,
-            size_slug=class_obj.droplet_size,
-            region=class_obj.droplet_region,
-            name=name,
-            image=class_obj.droplet_image,
-            user_data=data,
-        )
-        droplet.create()
-
-        droplet_obj = Droplet(
-            group=class_obj, droplet_id=droplet.id, initial_pwd=pwd
-        )
-        droplet_obj.save()
-        count = count + 1
+    return droplet.id
 
 
 def end_class(token, class_obj):

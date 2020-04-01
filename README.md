@@ -6,6 +6,9 @@ resources students use.
 
 ## This is in Development/Alpha phase and has no guarantee to work
 
+## Dev Notes
+* Run `export $(grep -v '^#' env | xargs)` to set env vars from an env file
+
 # Issues this solves
 * Removes the need for every student to have an account to use the resources
    * Collegiate - Not all students have credit cards. This could be a barrier

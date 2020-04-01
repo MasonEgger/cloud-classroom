@@ -2,10 +2,11 @@ from django.db import models
 
 from classes.models import Class
 from students.models import Student
+from users.models import User
 
 
 class Droplet(models.Model):
-    owner = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     class_id = models.ForeignKey(Class, on_delete=models.DO_NOTHING)
     droplet_id = models.CharField(max_length=64)
     name = models.CharField(max_length=128)
