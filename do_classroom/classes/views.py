@@ -74,6 +74,7 @@ class create_class(APIView):
 
     def post(self, request):
         params = {}
+
         x = request.data.get("class_id", None)
         params["test"] = x
         return Response(params, status=200)
