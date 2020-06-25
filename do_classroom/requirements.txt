@@ -1,5 +1,6 @@
 appdirs==1.4.3
 appnope==0.1.0
+asgiref==3.2.10
 astroid==2.3.3
 attrs==19.3.0
 backcall==0.1.0
@@ -13,7 +14,7 @@ coreschema==0.0.4
 cryptography==2.8
 decorator==4.4.0
 defusedxml==0.6.0
-Django==2.2.10
+Django==3.0.7
 django-cors-headers==3.2.0
 django-webpack-loader==0.6.0
 djangorestframework==3.11.0
@@ -53,7 +54,7 @@ pyparsing==2.4.5
 python-digitalocean==1.14.0
 python-social-auth==0.3.6
 python3-openid==3.1.0
-pytz==2019.3
+pytz==2020.1
 PyYAML==5.3.1
 regex==2020.2.20
 requests==2.22.0
@@ -62,7 +63,7 @@ ruamel.yaml==0.16.5
 ruamel.yaml.clib==0.2.0
 six==1.13.0
 social-auth-core==3.2.0
-sqlparse==0.3.0
+sqlparse==0.3.1
 sshpubkeys==3.1.0
 stevedore==1.30.1
 toml==0.10.0
