@@ -348,6 +348,48 @@ paths:
         200:
           description: ""
           content: {}
+  /users/obtain-auth-token:
+    post:
+      tags:
+      - users
+      description: Obtain API Token
+      operationId: users_obtain_auth_token
+      requestBody:
+        description: Provide username and password to obtain token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              username: string
+              password: string
+      responses:
+        200:
+          description: "API Token Returned"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Descriptive error message
+                    example: API Token
+        400:
+          description: "Unable to login with provided credentials"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  non_field_errors:
+                    type: array
+                    items:
+                      type: string
+                      example: Unable to log in with provided credentials.
+                    description: Descriptive error message
+
 components:
   securitySchemes:
     Basic:
