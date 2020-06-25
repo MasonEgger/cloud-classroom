@@ -16,7 +16,7 @@ urlpatterns = [
     #    name="create",
     # ),
     path("delete/<int:droplet_id>", views.delete.as_view(), name="delete"),
-    # path("delete-all", views.delete_all.as_view(), name="delete_all"),
+    path("delete-all", views.delete_all.as_view(), name="delete_all"),
     path(
         "power-control/<int:droplet_id>/<str:power_option>",
         views.power_control.as_view(),
