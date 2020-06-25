@@ -99,16 +99,16 @@ class delete(APIView):
             return Response(params, status=params["status"])
         if user_data["is_teacher"] is True:
             destroy(settings.DO_TOKEN, droplet_id)
-            params["message"] = "Teacher deleted Droplet"
+            params["message"] = "Successfully deleted Droplet"
             params["status"] = 200
         else:
             droplets = Droplet.objects.filter(owner=user.user)
             if droplet in droplets:
                 destroy(settings.DO_TOKEN, droplet_id)
-                params["message"] = "Droplet deleted"
+                params["message"] = "Successfully deleted Droplet"
                 params["status"] = 200
             else:
-                params["message"] = "User does not own specified droplet"
+                params["message"] = "User does not own specified Droplet"
                 params["status"] = 403
         return Response(params, status=params["status"])
 

@@ -1,243 +1,355 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: DigitalOcean Classroom API
   description: API for using DigitalOcean Classroom, an infrastructure classroom management
     tool
   termsOfService: https://www.google.com/policies/terms/
   contact:
-    email: contact@snippets.local
+    email: mason@digitalocean.com
   license:
     name: Apache2
   version: v1
-host: dev.zelgius.codes:8000
-schemes:
-  - http
-basePath: /api/v1
-consumes:
-  - application/json
-produces:
-  - application/json
-securityDefinitions:
-  Basic:
-    type: basic
+servers:
+- url: http://dev.zelgius.codes:8000/api/v1
 security:
-  - Basic: []
+- Basic: []
 paths:
   /auth/check:
     get:
-      operationId: auth_check_list
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - auth
-    parameters: []
+      - auth
+      description: Validate that your token is authenticated.
+      operationId: auth_check_list
+      responses:
+        200:
+          description: A message validating authentication
+          content: 
+            applictaion/json:
+              example:
+                message: authenticated
   /classes/:
     get:
-      operationId: classes_list
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - classes
-    parameters: []
+      - classes
+      operationId: classes_list
+      responses:
+        200:
+          description: ""
+          content: {}
   /classes/{class_id}:
     get:
-      operationId: classes_read
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - classes
-    parameters:
+      - classes
+      operationId: classes_read
+      parameters:
       - name: class_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
+      responses:
+        200:
+          description: ""
+          content: {}
   /classes/create:
     post:
-      operationId: classes_create
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - classes
-    parameters: []
+      - classes
+      operationId: classes_create
+      responses:
+        200:
+          description: ""
+          content: {}
   /droplets/assign/{droplet_id}/{user_id}/{class_id}:
     get:
-      operationId: droplets_assign_read
-      description: Assign a droplet to a user
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
+      - droplets
+      description: Assign a droplet to a user
+      operationId: droplets_assign_read
+      parameters:
       - name: class_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
       - name: droplet_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
       - name: user_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
+      responses:
+        200:
+          description: ""
+          content: {}
   /droplets/create/{class_id}:
     get:
-      operationId: droplets_create_read
-      description: Create a droplet inside a specific class
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
+      - droplets
+      description: Create a droplet inside a specific class
+      operationId: droplets_create_read
+      parameters:
       - name: class_id
         in: path
         required: true
-        type: string
+        schema:
+          type: integer
+        description: The ID of the Class to create the droplet in.
+      responses:
+        200:
+          description: "Droplet(s) created"
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  droplet_count: 
+                    type: integer
+                    description: The number of droplets created.
+                    example: 1
+                  droplets:
+                    type: array
+                    items: 
+                      type: object
+                      properties:
+                        class:
+                          type: string
+                          description: Name of class the droplet was created in
+                        class_id:
+                          type: integer
+                          description: ID of the class the droplet was created in
+                        droplet_id:
+                          type: string
+                          description:  DigitalOcean ID of the Droplet
+                        initial_password:
+                          type: string
+                          description: Default password for the root user. Will need to be changed at first login.
+                        ip_addr:
+                          type: string
+                          description: IP Address of the droplet
+                        name:
+                          type: string
+                          description: Name of the Droplet as it will appear in the DigitalOcean dashboard
+                        owner:
+                          type: string
+                          description: Owner of the Droplet
+                        owner_email:
+                          type: string
+                          description: Email address of the owner of the Droplet
+                        owner_id:
+                          type: integer
+                          description: ID of the owner of the Droplet
+                  status:
+                    type: integer
+                    description: HTTP status code of request
+                    example: 200
+                    
+        403:
+          description: "Max number of droplets reached"
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Max number of droplets reached
+                  status:
+                    type: integer
+                    description: HTTP status code of request
+                    example: 403
+        404:
+          description: "Invalid class, User is not in class."
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Invalid class
+                  status:
+                    type: integer
+                    description: HTTP status code of request
+                    example: 404
+        
+      
   /droplets/delete/{droplet_id}:
     get:
-      operationId: droplets_delete_read
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
+      - droplets
+      operationId: droplets_delete_read
+      description: Delete a specific Droplet
+      parameters:
       - name: droplet_id
         in: path
         required: true
-        type: string
+        schema:
+          type: integer
+        description: The DigitalOcean ID of the Droplet to delete
+      responses:
+        200:
+          description: "Successfully deleted Droplet"
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Successfully deleted Droplet
+                  status:
+                    type: integer
+                    description: HTTP status code of request
+                    example: 200
+        403:
+          description: "User does not own specified Droplet"
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Invalid droplet
+                  status:
+                    type: integer
+                    description: HTTP status code of request
+                    example: 404
+        404:
+          description: "Invalid Droplet"
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Invalid droplet
+                  status:
+                    type: integer
+                    description: HTTP status code of request
+                    example: 404
   /droplets/delete-all/:
     get:
-      operationId: droplets_delete_all
-      description: 'Delete all droplets associated with your user'
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
-      - name: droplet_id
-        in: path
-        required: true
-        type: string
+      - droplets
+      description: Delete all droplets associated with your user
+      operationId: droplets_delete_all
+      responses:
+        200:
+          description: ""
+          content: {}
   /droplets/power-control/{droplet_id}/{power_option}:
     get:
-      operationId: droplets_power-control_read
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
+      - droplets
+      operationId: droplets_power-control_read
+      parameters:
       - name: droplet_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
       - name: power_option
         in: path
         required: true
-        type: string
+        schema:
+          type: string
+      responses:
+        200:
+          description: ""
+          content: {}
   /droplets/view:
     get:
-      operationId: droplets_view_list
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters: []
+      - droplets
+      operationId: droplets_view_list
+      responses:
+        200:
+          description: ""
+          content: {}
   /droplets/view/{droplet_id}:
     get:
-      operationId: droplets_view_read
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
+      - droplets
+      operationId: droplets_view_read
+      parameters:
       - name: droplet_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
+      responses:
+        200:
+          description: ""
+          content: {}
   /droplets/view-class-droplets/{class_id}:
     get:
-      operationId: droplets_view_class_droplets_read
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
+      - droplets
+      operationId: droplets_view_class_droplets_read
+      parameters:
       - name: class_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
+      responses:
+        200:
+          description: ""
+          content: {}
   /droplets/class-droplet-count/{class_id}:
     get:
-      operationId: droplets_class_droplet_count_read
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - droplets
-    parameters:
+      - droplets
+      operationId: droplets_class_droplet_count_read
+      parameters:
       - name: class_id
         in: path
         required: true
-        type: string
+        schema:
+          type: string
+      responses:
+        200:
+          description: ""
+          content: {}
   /resources/:
     get:
-      operationId: resources_list
-      description: ''
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - resources
-    parameters: []
+      - resources
+      operationId: resources_list
+      responses:
+        200:
+          description: ""
+          content: {}
   /users/view/{class_id}:
     get:
-      operationId: users_view_read
-      description: Create a droplet
-      parameters: []
-      responses:
-        '200':
-          description: ''
       tags:
-        - users
-    parameters:
+      - users
+      description: Create a droplet
+      operationId: users_view_read
+      parameters:
       - name: class_id
         in: path
         required: true
-        type: string
-definitions: {}
+        schema:
+          type: string
+      responses:
+        200:
+          description: ""
+          content: {}
+components:
+  securitySchemes:
+    Basic:
+      type: http
+      scheme: basic
