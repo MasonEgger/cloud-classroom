@@ -13,7 +13,7 @@ resources students use.
 1. Create a Python virtual environment in your home directory `python3 -m venv ~/do-classroom`
 2. Activate the environment `source ~/do-classroom/bin/activate`
 3. Install Python requirements `pip install -r do_classroom/requirements.txt`
-4. Setup DB by making migrations `python do_classroom/manage.py makemigrations`
+4. Setup DB by making migrations `python do_classroom/manage.py migrate`
 5. Create a superuser for testing `python do_classroom/manage.py createsuperuser`
 6. Create an `env` file for environment variables as shown in `env.example`
     * Add a DigitalOcean API key to the file as `DO_TOKEN`
