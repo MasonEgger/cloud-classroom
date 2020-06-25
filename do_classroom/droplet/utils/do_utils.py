@@ -8,6 +8,14 @@ import xkcdpass.xkcd_password as xp
 from datetime import datetime
 import time
 import crypt
+import requests
+import json
+
+API_URL_BASE = "https://api.digitalocean.com/v2/"
+HEADERS_STRING = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer {0}",
+}
 
 
 def hashpwd(pwd):
@@ -87,6 +95,21 @@ def power_off(token, droplet_id):
 def power_on(token, droplet_id):
     droplet = digitalocean.Droplet(token=token, id=droplet_id)
     droplet.power_on()
+
+
+def power_status(token, droplet_id):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {0}".format(token),
+    }
+    api_url = "{0}droplets/{1}".format(API_URL_BASE, droplet_id)
+
+    response = requests.get(api_url, headers=headers)
+
+    if response.status_code == 200:
+        resp = json.loads(response.content.decode("utf-8"))
+        return resp["droplet"]["status"]
+    return None
 
 
 def destroy(token, droplet_id):

@@ -4,7 +4,14 @@ from students.models import Student
 from teachers.models import Teacher
 from droplet.models import Droplet
 from users.models import User
-from droplet.utils.do_utils import add_droplet, destroy, power_off, power_on
+from users.utils import get_user_role
+from droplet.utils.do_utils import (
+    add_droplet,
+    destroy,
+    power_off,
+    power_on,
+    power_status,
+)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -50,12 +57,10 @@ class create(APIView):
                     params["message"] = "Max number of droplets reached"
                     return Response(params, status=params["status"])
             else:
-                if len(droplets) + count > clas.droplet_student_limit:
+                if count + len(droplets) > clas.droplet_student_limit:
                     params["status"] = 403
                     params["message"] = "Max number of droplets reached"
                     return Response(params, status=params["status"])
-
-            # params["droplet-id"] = []
 
             params["droplet_info"] = []
             for i in range(0, count):
@@ -183,7 +188,11 @@ class view(APIView):
                 return Response(params, status=params["status"])
             if user_data["is_teacher"] is True:
                 teacher_classes = Class.objects.filter(teacher=user)
-            if user == droplet.owner or (
+
+            # Since we are comparing a User to a Student or teacher, we must
+            # get the base class user id for both. User is either a student
+            # or teacher, where the droplet owner is a Foreign key to a user.
+            if user.user.id == droplet.owner.id or (
                 user_data["is_teacher"] is True
                 and droplet.class_id in teacher_classes
             ):
@@ -214,7 +223,16 @@ class view_class_droplets(APIView):
     def get(self, request, class_id):
         params = {}
         request_user = request.user
-        user_data = get_user_role(request_user)
+
+        try:
+            clas = Class.objects.get(id=class_id)
+        except Class.DoesNotExist:
+            params["message"] = "Invalid class"
+            params["status"] = 404
+            return Response(params, status=params["status"])
+
+        user_data = get_user_role(request_user, clas)
+
         if user_data[0] is False:
             return Response(user_data[1], status=user_data[1]["status"])
 
@@ -224,13 +242,8 @@ class view_class_droplets(APIView):
             params["message"] = "Only teachers can view class droplets"
             params["status"] = 403
             return Response(params, status=params["status"])
-        try:
-            clas = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
-            params["message"] = "Invalid class"
-            params["status"] = 404
-            return Response(params, status=params["status"])
-        if user != clas.teacher:
+
+        if user_data["teaches_class"] is not True:
             params[
                 "message"
             ] = "Only official class teachers can view class droplets"
@@ -254,19 +267,55 @@ class view_class_droplets(APIView):
                 }
             )
 
-        return Response(params, status=params["status"])
+        return Response(params, status=params.get("status", 200))
+
+
+class class_droplet_count(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, class_id):
+        params = {}
+        request_user = request.user
+
+        try:
+            clas = Class.objects.get(id=class_id)
+        except Class.DoesNotExist:
+            params["message"] = "Invalid class"
+            params["status"] = 404
+            return Response(params, status=params["status"])
+
+        user_data = get_user_role(request_user, clas)
+
+        if user_data[0] is False:
+            return Response(user_data[1], status=user_data[1]["status"])
+
+        user_data = user_data[1]
+        if (
+            user_data["is_in_class"] is not True
+            and user_data["teaches_class"] is not True
+        ):
+            params[
+                "message"
+            ] = "Only teachers of the class or students in the class can view droplet count"
+            params["status"] = 403
+            return Response(params, status=params["status"])
+
+        droplets = Droplet.objects.filter(class_id=clas)
+        params["droplet_count"] = len(droplets)
+
+        return Response(params, status=params.get("status", 200))
 
 
 class power_control(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, droplet_id, power_option):
-        options = ["power-off", "power-on"]
+        options = ["power-off", "power-on", "status"]
         params = {}
         if power_option.lower() not in options:
             params[
                 "message"
-            ] = "Incorrect power option. Options are power-on and power-off"
+            ] = "Incorrect power option. Options are power-on, power-off, and status"
             params["status"] = 400
             return Response(params, status=params["status"])
         request_user = request.user
@@ -286,18 +335,40 @@ class power_control(APIView):
 
         if user_data["is_teacher"] is True:
             teacher_classes = Class.objects.filter(teacher=user)
-        if user == droplet.owner or (
+        if user.user.id == droplet.owner.id or (
             user_data["is_teacher"] is True
             and droplet.class_id in teacher_classes
         ):
             if power_option == "power-off":
                 power_off(settings.DO_TOKEN, droplet_id)
                 params["message"] = "Droplet powered off"
+                params["power_status"] = "off"
                 params["status"] = 200
-            else:
+            elif power_option == "power-on":
                 power_on(settings.DO_TOKEN, droplet_id)
                 params["message"] = "Droplet powered on"
+                params["power_status"] = "on"
                 params["status"] = 200
+            else:
+                status = power_status(settings.DO_TOKEN, droplet_id)
+                if status is None:
+                    params["message"] = "Unable to determine power status"
+                    params["status"] = 404
+                elif status == "off":
+                    params["message"] = "Droplet is powered off"
+                    params["power_status"] = "off"
+                    params["status"] = 200
+                elif status == "active":
+                    params["message"] = "Droplet is powered on"
+                    params["power_status"] = "on"
+                    params["status"] = 200
+                else:
+                    params[
+                        "message"
+                    ] = "Droplet power status is unknown by API"
+                    params["power_status"] = status
+                    params["status"] = 200
+
         else:
             params["message"] = "User does not own droplet"
             params["status"] = 403
@@ -395,51 +466,3 @@ class assign(APIView):
         params["message"] = "Droplet successfully reassigned"
         params["status"] = 200
         return Response(params, status=params["status"])
-
-
-def is_student(user):
-    try:
-        student = Student.objects.get(user=user)
-    except Student.DoesNotExist:
-        student = None
-    return student
-
-
-def is_teacher(user):
-    try:
-        teacher = Teacher.objects.get(user=user)
-    except Teacher.DoesNotExist:
-        teacher = None
-    return teacher
-
-
-def get_user_role(user):
-    """
-    Determine if the user is a valid student or teacher. Teacher takes a
-    higher precedence so if the account is both it will return the teacher
-    instance of the user.
-
-    If the account is invalid this function returns a tuple of (False, dict)
-    where the dict contains the necessary HTTP messaging.
-
-    If the account is a valid teacher/student this fuction returns a tuple of
-    (True, dict), where the dict returns the user object as well as boolean
-    attributes describing if the user `is_teacher` and `is_student`.
-    """
-    results = {"is_student": False, "is_teacher": False, "user": None}
-    student = is_student(user)
-    teacher = is_teacher(user)
-
-    if student is None and teacher is None:
-        return (False, {"message": "Invalid User", "status": 404})
-
-    if teacher is not None:
-        results["user"] = teacher
-        results["is_teacher"] = True
-        if student is not None:
-            results["is_student"] = True
-    else:
-        results["user"] = student
-        results["is_student"] = True
-
-    return (True, results)

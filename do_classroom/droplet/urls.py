@@ -25,8 +25,13 @@ urlpatterns = [
     path("view", views.view.as_view(), name="view"),
     path("view/<int:droplet_id>", views.view.as_view(), name="view"),
     path(
-        "view_class_droplets/<int:class_id>",
+        "view-class-droplets/<int:class_id>",
         views.view_class_droplets.as_view(),
         name="view_class_droplets",
+    ),
+    path(
+        "class-droplet-count/<int:class_id>",
+        views.class_droplet_count.as_view(),
+        name="class_droplet_count",
     ),
 ]

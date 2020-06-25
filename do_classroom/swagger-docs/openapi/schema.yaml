@@ -169,9 +169,24 @@ paths:
         in: path
         required: true
         type: string
-  /droplets/view_class_droplets/{class_id}:
+  /droplets/view-class-droplets/{class_id}:
     get:
       operationId: droplets_view_class_droplets_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: class_id
+        in: path
+        required: true
+        type: string
+  /droplets/class-droplet-count/{class_id}:
+    get:
+      operationId: droplets_class_droplet_count_read
       description: ''
       parameters: []
       responses:
