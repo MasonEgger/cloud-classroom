@@ -1,0 +1,213 @@
+swagger: '2.0'
+info:
+  title: DigitalOcean Classroom API
+  description: API for using DigitalOcean Classroom, an infrastructure classroom management
+    tool
+  termsOfService: https://www.google.com/policies/terms/
+  contact:
+    email: contact@snippets.local
+  license:
+    name: Apache2
+  version: v1
+host: dev.zelgius.codes:8000
+schemes:
+  - http
+basePath: /api/v1
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  Basic:
+    type: basic
+security:
+  - Basic: []
+paths:
+  /auth/check:
+    get:
+      operationId: auth_check_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - auth
+    parameters: []
+  /classes/:
+    get:
+      operationId: classes_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - classes
+    parameters: []
+  /classes/{class_id}:
+    get:
+      operationId: classes_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - classes
+    parameters:
+      - name: class_id
+        in: path
+        required: true
+        type: string
+  /classes/create:
+    post:
+      operationId: classes_create
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - classes
+    parameters: []
+  /droplets/assign/{droplet_id}/{user_id}/{class_id}:
+    get:
+      operationId: droplets_assign_read
+      description: Assign a droplet to a user
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: class_id
+        in: path
+        required: true
+        type: string
+      - name: droplet_id
+        in: path
+        required: true
+        type: string
+      - name: user_id
+        in: path
+        required: true
+        type: string
+  /droplets/create/{class_id}:
+    get:
+      operationId: droplets_create_read
+      description: Create a droplet inside a specific class
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: class_id
+        in: path
+        required: true
+        type: string
+  /droplets/delete/{droplet_id}:
+    get:
+      operationId: droplets_delete_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: droplet_id
+        in: path
+        required: true
+        type: string
+  /droplets/power-control/{droplet_id}/{power_option}:
+    get:
+      operationId: droplets_power-control_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: droplet_id
+        in: path
+        required: true
+        type: string
+      - name: power_option
+        in: path
+        required: true
+        type: string
+  /droplets/view:
+    get:
+      operationId: droplets_view_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters: []
+  /droplets/view/{droplet_id}:
+    get:
+      operationId: droplets_view_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: droplet_id
+        in: path
+        required: true
+        type: string
+  /droplets/view_class_droplets/{class_id}:
+    get:
+      operationId: droplets_view_class_droplets_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: class_id
+        in: path
+        required: true
+        type: string
+  /resources/:
+    get:
+      operationId: resources_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - resources
+    parameters: []
+  /users/view/{class_id}:
+    get:
+      operationId: users_view_read
+      description: Create a droplet
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - users
+    parameters:
+      - name: class_id
+        in: path
+        required: true
+        type: string
+definitions: {}

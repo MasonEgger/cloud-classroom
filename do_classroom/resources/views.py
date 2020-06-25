@@ -17,41 +17,53 @@ re_slug = re.compile("^(centos|debian|fedora|ubuntu).+x64$")
 
 # Create your views here.
 
+
 class list_resources(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        res = {'regions': [], 'images': []}
-        res['regions'] = _get_regions()
-        res['images'] = _get_images()
+        res = {"regions": [], "images": []}
+        print(manager)
+        res["regions"] = _get_regions()
+        res["images"] = _get_images()
         return Response(res)
 
 
 def _get_regions():
-    res = [] # return a list of region objects
+    res = []  # return a list of region objects
     try:
         req = manager.get_all_regions()
         for r in req:
-            res.append({"slug":r.slug, "name":r.name})
+            print(r)
+            res.append({"slug": r.slug, "name": r.name})
     except:
         pass
-    res = sorted(res, key=lambda k: k['slug'])
+    res = sorted(res, key=lambda k: k["slug"])
     return res
 
 
 def _get_images():
     res = []
     try:
+        print("images")
         req = manager.get_all_images()
         for i in req:
+            print(i)
             try:
                 if re_slug.match(i.slug):
-                    res.append({"slug":i.slug, "name":i.name, "description":i.description, "distribution":i.distribution})
+                    res.append(
+                        {
+                            "slug": i.slug,
+                            "name": i.name,
+                            "description": i.description,
+                            "distribution": i.distribution,
+                        }
+                    )
             except:
                 pass
     except:
         pass
-    res = sorted(res, key=lambda k: k['slug'])
+    res = sorted(res, key=lambda k: k["slug"])
     return res
 
 
@@ -61,17 +73,19 @@ def _get_droplets():
         req = manager.get_all_droplets()
         if len(req) > 0:
             for d in req:
-                res.append({
-                    "id":d.id,
-                    "name":d.name,
-                    "ip_address":d.ip_address,
-                    "disk":d.disk,
-                    "status":d.status,
-                    "tags":d.tags,
-                    })
+                res.append(
+                    {
+                        "id": d.id,
+                        "name": d.name,
+                        "ip_address": d.ip_address,
+                        "disk": d.disk,
+                        "status": d.status,
+                        "tags": d.tags,
+                    }
+                )
     except:
         res = []
-    res = sorted(res, key=lambda k: k['id'])
+    res = sorted(res, key=lambda k: k["id"])
     return res
 
 
@@ -80,9 +94,9 @@ def _get_droplet(droplet_id):
     try:
         r = manager.get_droplet(droplet_id)
         if r is not None:
-            res['droplet'] = r
+            res["droplet"] = r
         else:
-            res['droplet'] = None
+            res["droplet"] = None
     except:
         res = None
     return res

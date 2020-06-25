@@ -24,6 +24,7 @@ class Class(models.Model):
     droplet_priv_net = models.BooleanField(default=False)
     droplet_ipv6 = models.BooleanField(default=False)
     droplet_user_data = models.TextField(null=True, blank=True)
+    force_teacher_ssh_key = models.BooleanField(default=False)
 
     def _is_active(self):
         if not self.destroyed_at:

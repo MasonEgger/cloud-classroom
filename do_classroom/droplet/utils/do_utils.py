@@ -1,5 +1,6 @@
 from teachers.models import Teacher
 from droplet.models import Droplet
+from users.models import Profile
 
 import digitalocean
 from digitalocean.baseapi import NotFoundError
@@ -90,15 +91,17 @@ def power_on(token, droplet_id):
 
 def destroy(token, droplet_id):
     droplet = digitalocean.Droplet(token=token, id=droplet_id)
-    resp = droplet.destroy()
+    try:
+        droplet.destroy()
+    except NotFoundError:
+        pass
 
-    if resp:
-        droplet_obj = Droplet.objects.get(droplet_id=droplet_id)
-        droplet_obj.class_id.droplet_count = (
-            droplet_obj.class_id.droplet_count - 1
-        )
-        droplet_obj.class_id.save()
-        droplet_obj.delete()
+    droplet_obj = Droplet.objects.get(droplet_id=droplet_id)
+    droplet_obj.class_id.droplet_count = (
+        droplet_obj.class_id.droplet_count - 1
+    )
+    droplet_obj.class_id.save()
+    droplet_obj.delete()
 
 
 def list_droplets(token, prefix):
@@ -115,34 +118,50 @@ def list_droplets(token, prefix):
 
 def add_droplet(token, class_obj, owner):
     size = class_obj.droplet_size
+
     user = "ubuntu"
     expire = True
-    count = class_obj.droplet_count + 1
 
     pwd = mkpasswd()
-    hashed_pwd = hashpwd(pwd)
     data = cloud_config.format(user, user, pwd, expire)
     name = (
         class_obj.prefix
         + "-"
         + owner.email.replace("@", "-AT-")
         + "-"
-        + str(count).zfill(3)
+        + pwd.split(" ")[0]
     )
 
-    droplet = digitalocean.Droplet(
-        token=token,
-        size_slug=class_obj.droplet_size,
-        region=class_obj.droplet_region,
-        name=name,
-        image=class_obj.droplet_image,
-        user_data=data,
-    )
+    droplet_data = {
+        "token": token,
+        "size_slug": class_obj.droplet_size,
+        "region": class_obj.droplet_region,
+        "name": name,
+        "image": class_obj.droplet_image,
+        "user_data": data,
+    }
+    if class_obj.force_teacher_ssh_key is True:
+        teachers = class_obj.teacher_set.all()
+        ssh_keys = []
+        for teacher in teachers:
+            try:
+                prof = Profile.objects.get(user=teacher.user)
+                if prof.ssh_key != "":
+                    ssh_keys.append(prof.ssh_key)
+            except Profile.DoesNotExist:
+                pass
+        if len(ssh_keys) > 0:
+            droplet_data["ssh_keys"] = ssh_keys
+
+    droplet = digitalocean.Droplet(**droplet_data)
     droplet.create()
     # have to load the droplet to get the IP address
     while droplet.ip_address is None:
         time.sleep(1)
-        droplet.load()
+        try:
+            droplet.load()
+        except digitalocean.DataReadError:
+            print("{0} waiting to load".format(droplet.name))
     droplet_obj = Droplet(
         name=name,
         class_id=class_obj,
@@ -154,9 +173,13 @@ def add_droplet(token, class_obj, owner):
         owner=owner,
     )
     droplet_obj.save()
-    class_obj.droplet_count = count
-    class_obj.save()
-    return droplet.id
+
+    return {
+        "droplet_id": droplet.id,
+        "droplet_ip": droplet.ip_address,
+        "user": user,
+        "initial_password": pwd,
+    }
 
 
 def end_class(token, class_obj):
