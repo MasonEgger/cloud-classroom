@@ -124,6 +124,21 @@ paths:
         in: path
         required: true
         type: string
+  /droplets/delete-all/:
+    get:
+      operationId: droplets_delete_all
+      description: 'Delete all droplets associated with your user'
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - droplets
+    parameters:
+      - name: droplet_id
+        in: path
+        required: true
+        type: string
   /droplets/power-control/{droplet_id}/{power_option}:
     get:
       operationId: droplets_power-control_read
