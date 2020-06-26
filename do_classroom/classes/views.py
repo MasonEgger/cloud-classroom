@@ -17,7 +17,7 @@ class get_classes(APIView):
         else:
             params["classes"] = []
             for clas in classes:
-                params["classes"].append(clas.name)
+                params["classes"].append({"name": clas.name, "id": clas.id})
             params["status"] = 200
         return Response(params, status=200)
 
@@ -78,6 +78,46 @@ class enrolled(APIView):
             params["status"] = 401
 
         return Response(params, params["status"])
+
+
+class enroll(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, class_id):
+        params = {}
+        request_user = request.user
+
+        try:
+            c = Class.objects.get(id=class_id)
+        except Class.DoesNotExist:
+            params["message"] = "Invalid class"
+            params["status"] = 404
+            return Response(params, params["status"])
+
+        user_data = get_user_role(request_user, class_id)[1]
+
+        if user_data["teaches_class"] is True:
+            params[
+                "message"
+            ] = "User teaches this class, therefore cannot enroll"
+            params["status"] = 401
+            return Response(params, params["status"])
+
+        if user_data["is_student"] is False:
+            if user_data["user"] is None:
+                student = Student.objects.create(user=request_user)
+                student.classes.set(c)
+                student.save()
+                params["message"] = "User was enrolled in class"
+                params["status"] = 200
+            elif user_data["is_teacher"] is True:
+                student = Student.objects.create(user=user_data["user"].user)
+                student.classes.set(c)
+                student.save()
+                params["message"] = "User was enrolled in class"
+                params["status"] = 200
+        else:
+            student = Student.objects.get(user=user_data["user"].user)
 
 
 class get_class(APIView):
