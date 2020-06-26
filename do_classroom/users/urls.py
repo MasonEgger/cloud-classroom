@@ -11,4 +11,5 @@ urlpatterns = [
         authviews.obtain_auth_token,
         name="obtain-auth-token",
     ),
+    path("register/", views.register.as_view(), name="register"),
 ]

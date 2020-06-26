@@ -15,7 +15,9 @@ class Class(models.Model):
     destroyed_at = models.DateTimeField(null=True, blank=True)
     name = models.CharField(max_length=200)
     droplet_count = models.IntegerField(default=1)
-    prefix = models.CharField(max_length=15, default=prefix_generator)
+    prefix = models.CharField(
+        max_length=15, default=prefix_generator, unique=True
+    )
 
     droplet_image = models.CharField(max_length=50)
     droplet_size = models.CharField(max_length=25)
@@ -25,6 +27,7 @@ class Class(models.Model):
     droplet_ipv6 = models.BooleanField(default=False)
     droplet_user_data = models.TextField(null=True, blank=True)
     force_teacher_ssh_key = models.BooleanField(default=False)
+    allow_registration = models.BooleanField(default=False)
 
     def _is_active(self):
         if not self.destroyed_at:

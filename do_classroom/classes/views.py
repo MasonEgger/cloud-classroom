@@ -6,6 +6,21 @@ from students.models import Student
 from teachers.models import Teacher
 
 
+class get_classes(APIView):
+    def get(self, request):
+        classes = Class.objects.all()
+        params = {}
+        if len(classes) == 0:
+            params["message"] = "No classes found"
+            params["status"] = 400
+        else:
+            params["classes"] = []
+            for clas in classes:
+                params["classes"].append(clas.name)
+            params["status"] = 200
+        return Response(params, status=200)
+
+
 class list_classes(APIView):
     permission_classes = (IsAuthenticated,)
 

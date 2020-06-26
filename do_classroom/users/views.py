@@ -59,3 +59,24 @@ class view(APIView):
             params["message"] = "Teacher is not in the class"
             params["status"] = 400
         return Response(params, status=params["status"])
+
+
+class register(APIView):
+    """
+    Create a droplet
+    """
+
+    def post(self, request):
+        params = {}
+
+        if (
+            (email := request.data.get("email"))
+            and (password := request.data.get("password"))
+            and (class_name := request.data.get("class"))
+            and (passcode := request.data.get("passcode"))
+        ):
+            clas = Class.objects.filter(name=class_name, prefix=passcode)
+            print(clas)
+            print(password)
+
+        return Response(params, status=params.get("status", 200))

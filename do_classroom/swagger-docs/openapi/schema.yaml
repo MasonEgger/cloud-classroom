@@ -348,7 +348,7 @@ paths:
         200:
           description: ""
           content: {}
-  /users/obtain-auth-token:
+  /users/obtain-auth-token/:
     post:
       tags:
       - users
