@@ -50,7 +50,9 @@ class create(APIView):
             return Response(params, status=params["status"])
 
         if clas in user.classes.all():
-            droplets = Droplet.objects.filter(owner=user.user)
+            droplets = Droplet.objects.filter(
+                owner=user.user, class_id=clas.id
+            )
             if user_data["is_teacher"]:
                 if count + len(droplets) > user.droplet_limit:
                     params["status"] = 403
@@ -251,6 +253,48 @@ class view_class_droplets(APIView):
             return Response(params, status=params["status"])
 
         droplets = Droplet.objects.filter(class_id=clas)
+        params["droplets"] = []
+        for droplet in droplets:
+            params["droplets"].append(
+                {
+                    "name": droplet.name,
+                    "owner": str(droplet.owner),
+                    "owner_email": droplet.owner.email,
+                    "owner_id": droplet.owner.id,
+                    "initial_password": droplet.initial_password,
+                    "ip_addr": droplet.ip_addr,
+                    "class": str(droplet.class_id),
+                    "class_id": droplet.class_id.id,
+                    "droplet_id": droplet.droplet_id,
+                }
+            )
+
+        return Response(params, status=params.get("status", 200))
+
+
+class view_my_class_droplets(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, class_id):
+        params = {}
+        request_user = request.user
+
+        try:
+            clas = Class.objects.get(id=class_id)
+        except Class.DoesNotExist:
+            params["message"] = "Invalid class"
+            params["status"] = 404
+            return Response(params, status=params["status"])
+
+        user_data = get_user_role(request_user, clas)
+
+        if user_data[0] is False:
+            return Response(user_data[1], status=user_data[1]["status"])
+
+        user_data = user_data[1]
+        user = user_data["user"]
+
+        droplets = Droplet.objects.filter(class_id=clas, owner=user.user)
         params["droplets"] = []
         for droplet in droplets:
             params["droplets"].append(
