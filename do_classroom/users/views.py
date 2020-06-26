@@ -5,6 +5,9 @@ from droplet.views import get_user_role
 from students.models import Student
 from classes.models import Class
 from droplet.models import Droplet
+from users.models import User
+from django.db.utils import IntegrityError
+from rest_framework.authtoken.models import Token
 
 # Create your views here.
 
@@ -74,9 +77,50 @@ class register(APIView):
             and (password := request.data.get("password"))
             and (class_name := request.data.get("class"))
             and (passcode := request.data.get("passcode"))
+            and (first_name := request.data.get("first_name"))
+            and (last_name := request.data.get("last_name"))
         ):
             clas = Class.objects.filter(name=class_name, prefix=passcode)
-            print(clas)
-            print(password)
+            if len(clas) != 1:
+                params[
+                    "message"
+                ] = "Class with that name and passcode was not found"
+                params["status"] = 404
+                return Response(params, status=params.get("status", 200))
+
+            if clas[0].allow_registration is False:
+                params[
+                    "message"
+                ] = "Class is not allowing registration at this time."
+                params["status"] = 403
+                return Response(params, status=params.get("status", 200))
+
+            try:
+                user = User.objects.create(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    password=passcode,
+                )
+            except IntegrityError:
+                params[
+                    "message"
+                ] = "User with that email address already exists"
+                params["status"] = 403
+                return Response(params, status=params.get("status", 200))
+
+            user.save()
+            student = Student.objects.create(user=user)
+            student.classes.set(clas)
+            student.save()
+
+            token = Token.objects.get(user=user)
+            params["api_token"] = token.key
+            params["status"] = 200
+        else:
+            params[
+                "message"
+            ] = "Missing arguments. email, password, first_name, last_name, class, and passcode are required"
+            params["status"] = 400
 
         return Response(params, status=params.get("status", 200))
