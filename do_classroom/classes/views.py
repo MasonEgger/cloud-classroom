@@ -83,7 +83,9 @@ class enrolled(APIView):
 class enroll(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, class_id):
+    # Modify to post, bring in passcode, figure out why teaches_class
+    # from utils doesn't work.
+    def post(self, request):
         params = {}
         request_user = request.user
 
@@ -96,6 +98,8 @@ class enroll(APIView):
 
         user_data = get_user_role(request_user, class_id)[1]
 
+        print(user_data)
+
         if user_data["teaches_class"] is True:
             params[
                 "message"
@@ -103,21 +107,32 @@ class enroll(APIView):
             params["status"] = 401
             return Response(params, params["status"])
 
+        if user_data["is_in_class"] is True:
+            params["message"] = "User is already enrolled in this class"
+            params["status"] = 401
+            return Response(params, params["status"])
+
         if user_data["is_student"] is False:
             if user_data["user"] is None:
                 student = Student.objects.create(user=request_user)
-                student.classes.set(c)
+                student.classes.add(c)
                 student.save()
                 params["message"] = "User was enrolled in class"
                 params["status"] = 200
             elif user_data["is_teacher"] is True:
                 student = Student.objects.create(user=user_data["user"].user)
-                student.classes.set(c)
+                student.classes.add(c)
                 student.save()
                 params["message"] = "User was enrolled in class"
                 params["status"] = 200
         else:
             student = Student.objects.get(user=user_data["user"].user)
+            student.classes.add(c)
+            student.save()
+            params["message"] = "User was enrolled in class"
+            params["status"] = 200
+
+        return Response(params, params["status"])
 
 
 class get_class(APIView):

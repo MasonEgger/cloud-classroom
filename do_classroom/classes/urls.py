@@ -11,4 +11,5 @@ urlpatterns = [
     path(
         "enrolled/<int:class_id>", views.enrolled.as_view(), name="enrolled"
     ),
+    path("enroll/<int:class_id>", views.enroll.as_view(), name="enroll"),
 ]
