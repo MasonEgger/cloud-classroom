@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from classes.models import Class
 from students.models import Student
 from teachers.models import Teacher
+from users.utils import get_user_role
 
 
 class get_classes(APIView):
@@ -45,6 +46,38 @@ class list_classes(APIView):
                     )
 
         return Response(params, status=200)
+
+
+class enrolled(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, class_id):
+        params = {}
+        request_user = request.user
+        user_data = get_user_role(request_user)[1]
+
+        if user_data["is_student"] is False:
+            params[
+                "message"
+            ] = "User is not a student, therefore cannot be enrolled in a class"
+            params["status"] = 401
+            return Response(params, params["status"])
+
+        try:
+            c = Class.objects.get(id=class_id)
+        except Class.DoesNotExist:
+            params["message"] = "Invalid class"
+            params["status"] = 404
+            return Response(params, params["status"])
+
+        if c in user_data["user"].classes.all():
+            params["message"] = "Student is enrolled."
+            params["status"] = 200
+        else:
+            params["message"] = "Student is not enrolled."
+            params["status"] = 401
+
+        return Response(params, params["status"])
 
 
 class get_class(APIView):
