@@ -34,7 +34,7 @@ paths:
       operationId: classes_list
       responses:
         200:
-          description: ""
+          description: "Get all classes you are enrolled it"
           content: {}
   /classes/{class_id}:
     get:
@@ -59,6 +59,24 @@ paths:
       responses:
         200:
           description: ""
+          content: {}
+  /classes/enroll:
+    post:
+      tags:
+      - classes
+      operationId: classes_enroll
+      responses:
+        200:
+          description: "Enroll in a class"
+          content: {}
+  /classes/enrolled:
+    get:
+      tags:
+      - classes
+      operationId: classes_enrolled
+      responses:
+        200:
+          description: "Check enrollment in a class"
           content: {}
   /droplets/assign/{droplet_id}/{user_id}/{class_id}:
     get:
@@ -336,7 +354,7 @@ paths:
     get:
       tags:
       - users
-      description: Create a droplet
+      description: View users in class
       operationId: users_view_read
       parameters:
       - name: class_id
@@ -348,7 +366,7 @@ paths:
         200:
           description: ""
           content: {}
-  /users/obtain-auth-token/:
+  /users/obtain-auth-token:
     post:
       tags:
       - users
@@ -389,6 +407,16 @@ paths:
                       type: string
                       example: Unable to log in with provided credentials.
                     description: Descriptive error message
+  /users/register/:
+    post:
+      tags:
+      - users
+      description: Register as a user and enroll in a class
+      operationId: users_register
+      responses:
+        200:
+          description: ""
+          content: {}
 
 components:
   securitySchemes:

@@ -88,6 +88,20 @@ class enroll(APIView):
     def post(self, request):
         params = {}
         request_user = request.user
+        class_id = request.data.get("class_id", None)
+        passcode = request.data.get("passcode", None)
+
+        if class_id is None or passcode is None:
+            params["message"] = "Missing parameters class_id or passcode"
+            params["status"] = 400
+            return Response(params, params["status"])
+
+        try:
+            class_id = int(class_id)
+        except ValueError:
+            params["message"] = "class_id must be numerical"
+            params["status"] = 400
+            return Response(params, params["status"])
 
         try:
             c = Class.objects.get(id=class_id)
@@ -96,7 +110,12 @@ class enroll(APIView):
             params["status"] = 404
             return Response(params, params["status"])
 
-        user_data = get_user_role(request_user, class_id)[1]
+        if c.allow_registration is False:
+            params["message"] = "Class not configured for registration"
+            params["status"] = 403
+            return Response(params, params["status"])
+
+        user_data = get_user_role(request_user, c)[1]
 
         print(user_data)
 

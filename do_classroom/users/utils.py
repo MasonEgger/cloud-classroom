@@ -33,7 +33,7 @@ def _is_teacher(user, class_obj=None):
     return teacher, teaches_class
 
 
-def get_user_role(user, class_id=None):
+def get_user_role(user, class_obj=None):
     """
     Determine if the user is a valid student or teacher. Teacher takes a
     higher precedence so if the account is both it will return the teacher
@@ -53,8 +53,8 @@ def get_user_role(user, class_id=None):
         "teaches_class": False,
         "is_in_class": False,
     }
-    student, is_in_class = _is_student(user, class_id)
-    teacher, teaches_class = _is_teacher(user, class_id)
+    student, is_in_class = _is_student(user, class_obj)
+    teacher, teaches_class = _is_teacher(user, class_obj)
 
     if student is None and teacher is None:
         return (False, {"message": "Invalid User", "status": 404})
