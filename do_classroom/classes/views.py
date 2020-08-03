@@ -8,18 +8,79 @@ from users.utils import get_user_role
 
 
 class get_classes(APIView):
+    """
+    This method returns all of the classes that:
+    * A student is enrolled in
+    * A teacher teaches
+    """
+
+    def get(self, request):
+        data = get_user_role(request.user)
+
+        params = {"classes": {}}
+
+        if data[0] is False:
+            params["message"] = "No classes found"
+            params["status"] = 404
+            del params["classes"]
+            return Response(params, status=params["status"])
+
+        user_data = data[1]
+
+        if user_data["is_student"] is True:
+            student = user_data["student_object"]
+            classes = list(student.classes.all())
+            student_classes = []
+            for clas in classes:
+                student_classes.append({"name": clas.name, "id": clas.id})
+            params["classes"]["student"] = student_classes
+        if user_data["is_teacher"] is True:
+            teacher = user_data["teacher_object"]
+            classes = list(teacher.classes.all())
+            teacher_classes = []
+            for clas in classes:
+                teacher_classes.append({"name": clas.name, "id": clas.id})
+            params["classes"]["teacher"] = teacher_classes
+
+        if (
+            not params["classes"]["student"]
+            and not params["classes"]["teacher"]
+        ):
+            params["message"] = "No classes found"
+            params["status"] = 404
+            del params["classes"]
+
+        params["status"] = 200
+
+        return Response(params, status=params.get("status", 200))
+
+
+class get_open_classes(APIView):
+    """
+    This method returns all of the classes that are currently open for
+    registration
+    """
+
     def get(self, request):
         classes = Class.objects.all()
         params = {}
         if len(classes) == 0:
             params["message"] = "No classes found"
-            params["status"] = 400
+            params["status"] = 404
         else:
             params["classes"] = []
             for clas in classes:
-                params["classes"].append({"name": clas.name, "id": clas.id})
-            params["status"] = 200
-        return Response(params, status=200)
+                if clas.allow_registration is True:
+                    params["classes"].append(
+                        {"name": clas.name, "id": clas.id}
+                    )
+            if not params["classes"]:
+                params["status"] = 404
+                params["message"] = "No classes open for registration"
+                del params["classes"]
+            else:
+                params["status"] = 200
+        return Response(params, params.get("status", 200))
 
 
 class list_classes(APIView):

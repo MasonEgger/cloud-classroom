@@ -25,17 +25,121 @@ paths:
           description: A message validating authentication
           content: 
             applictaion/json:
-              example:
-                message: authenticated
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    description: message
+                    example: authenticated
+        401:
+          description: A message denying validation
+          content: 
+            applictaion/json:
+              schema:
+                type: object
+                properties:
+                  detail: 
+                    type: string
+                    description: message
+                    example: Invalid token.
   /classes/:
     get:
       tags:
       - classes
+      description: "List all classes that user is associated with and their role regarding the class"
       operationId: classes_list
       responses:
         200:
-          description: "Get all classes you are enrolled it"
-          content: {}
+          description: A object containing keys student and teacher. Within each key is a list of classes in which the user has that role with said class.
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  classes:
+                    type: object
+                    properties:
+                      student:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            description: Class id
+                            example: 2
+                          name:
+                            type: string
+                            description: Class name
+                            example: Local Meetup
+                      teacher:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            description: Class id
+                            example: 1
+                          name:
+                            type: string
+                            description: Class name
+                            example: CS1428
+        404:
+          description: "No classes found"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: No classes found
+                  status:
+                    type: integer
+                    description: HTTP success code
+                    example: 404
+  /classes/open:
+    get:
+      tags:
+      - classes
+      description: "List all classes with open registration"
+      operationId: classes_open_list
+      responses:
+        200:
+          description: A list of all class names and ids that are available to register for
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  classes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Class id
+                          example: 1
+                        name:
+                          type: string
+                          description: Class name
+                          example: Local Meetup
+        404:
+          description: "No classes open for registration"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: No classes open for registration
+                  status:
+                    type: integer
+                    description: HTTP success code
+                    example: 404
+                   
   /classes/{class_id}:
     get:
       tags:
@@ -64,11 +168,94 @@ paths:
     post:
       tags:
       - classes
+      description: Enroll a student in a class. If a student object does not already exist this call will create one and add the student to the class. If a student object already exists it will add that object to the class.
       operationId: classes_enroll
+      requestBody:
+        description: Provide a class_id and passcode to enroll in a class
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              class_id: string
+              passcode: string
       responses:
         200:
-          description: "Enroll in a class"
-          content: {}
+          description: "User was enrolled in class"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive message
+                    example: User was enrolled in class
+                  status:
+                    type: integer
+                    description: HTTP success code
+                    example: 200
+        400:
+          description: "class_id must be numerical"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: class_id must be numerical
+                  status:
+                    type: integer
+                    description: HTTP success code
+                    example: 400
+        401:
+          description: "User is already associate with this class. Could be already enrolled or the teacher of the class"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: User is already enrolled in this class
+                  status:
+                    type: integer
+                    description: HTTP success code
+                    example: 401
+        403:
+          description: "Class is not configured to allow registration. If this error is seen then the class will need to be reconfigured."
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Class n ot configured for registration
+                  status:
+                    type: integer
+                    description: HTTP success code
+                    example: 403
+        404:
+          description: "Invalid class"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Invalid class
+                  status:
+                    type: integer
+                    description: HTTP success code
+                    example: 404
   /classes/enrolled:
     get:
       tags:

@@ -8,6 +8,11 @@ from users.models import User
 
 
 class ProfileInline(admin.StackedInline):
+    """This brings in the Profile class. This is data that doesn't need
+    to be added to the Admin model, but should be associated with a user.
+    Current only item is SSH Key
+    """
+
     model = Profile
     can_delete = False
     verbose_name_plural = "Profile"
@@ -24,6 +29,7 @@ class CustomUserAdmin(UserAdmin):
         "first_name",
         "last_name",
         "is_staff",
+        "is_superuser",
         "is_active",
     )
     list_filter = (
@@ -31,11 +37,15 @@ class CustomUserAdmin(UserAdmin):
         "first_name",
         "last_name",
         "is_staff",
+        "is_superuser",
         "is_active",
     )
     fieldsets = (
         (None, {"fields": ("email", "first_name", "last_name", "password")}),
-        ("Permissions", {"fields": ("is_staff", "is_active")}),
+        (
+            "Permissions",
+            {"fields": ("is_staff", "is_superuser", "is_active")},
+        ),
     )
     add_fieldsets = (
         (
@@ -49,12 +59,13 @@ class CustomUserAdmin(UserAdmin):
                     "password1",
                     "password2",
                     "is_staff",
+                    "is_superuser",
                     "is_active",
                 ),
             },
         ),
     )
-    search_fields = ("email","first_name", "last_name")
+    search_fields = ("email", "first_name", "last_name")
     ordering = ("email", "first_name", "last_name")
 
     def get_inline_instances(self, request, obj=None):

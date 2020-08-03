@@ -68,15 +68,15 @@ INSTALLED_APPS = [
     # Third-Party apps
     "rest_framework",
     "rest_framework.authtoken",
-    "drf_yasg",
-    "webpack_loader",
+    #"drf_yasg",
+    #"webpack_loader",
     # local
     "users.apps.UsersConfig",
     "droplet.apps.DropletConfig",
     "classes.apps.ClassesConfig",
     "students.apps.StudentsConfig",
     "teachers.apps.TeachersConfig",
-    "corsheaders",
+    #"corsheaders",
 ]
 
 REST_FRAMEWORK = {
@@ -88,7 +88,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
+    #"corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -174,21 +174,21 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "swagger-docs"),)
 
 DO_TOKEN = os.getenv("DO_TOKEN", "")
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-    "http://localhost:8000",
-]
+#CORS_ORIGIN_ALLOW_ALL = True
+#CORS_ALLOW_CREDENTIALS = True
+#CORS_ORIGIN_WHITELIST = [
+#    "http://127.0.0.1:3000",
+#    "http://localhost:3000",
+#    "http://localhost:8000",
+#]
 
-WEBPACK_LOADER = {
-    "DEFAULT": {
-        "CACHE": not DEBUG,
-        "BUNDLE_DIR_NAME": "dist/",
-        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
-        "POLL_INTERVAL": 0.1,
-        "TIMEOUT": None,
-        "IGNORE": [".*\.hot-update.js", ".+\.map"],
-    }
-}
+#WEBPACK_LOADER = {
+#    "DEFAULT": {
+#        "CACHE": not DEBUG,
+#        "BUNDLE_DIR_NAME": "dist/",
+#        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
+#        "POLL_INTERVAL": 0.1,
+#        "TIMEOUT": None,
+#        "IGNORE": [".*\.hot-update.js", ".+\.map"],
+#    }
+#}

@@ -46,10 +46,13 @@ def get_user_role(user, class_obj=None):
     (True, dict), where the dict returns the user object as well as boolean
     attributes describing if the user `is_teacher` and `is_student`.
     """
+    # TODO: Deprecate user key and switch to student/teacher object model
     results = {
         "is_student": False,
         "is_teacher": False,
         "user": None,
+        "teacher_object": None,
+        "student_object": None,
         "teaches_class": False,
         "is_in_class": False,
     }
@@ -61,12 +64,14 @@ def get_user_role(user, class_obj=None):
 
     if teacher is not None:
         results["user"] = teacher
+        results["teacher_object"] = teacher
         results["is_teacher"] = True
         if student is not None:
-
             results["is_student"] = True
+            results["student_object"] = student
     else:
         results["user"] = student
+        results["student_object"] = student
         results["is_student"] = True
 
     results["is_in_class"] = is_in_class
