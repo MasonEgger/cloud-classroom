@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from django.forms.models import model_to_dict
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from classes.models import Class
+from classes.serializers import ClassSerializer
 from students.models import Student
 from teachers.models import Teacher
 from users.utils import get_user_role
@@ -84,29 +86,25 @@ class get_open_classes(APIView):
 
 
 class list_classes(APIView):
-    permission_classes = (IsAuthenticated,)
+    """
+    This method returns all of the classes. This is an Admin Only Feature
+    """
+
+    permission_classes = (IsAuthenticated, IsAdminUser)
 
     def get(self, request):
+        classes = Class.objects.all()
         params = {}
-        user = request.user
-        if request.method == "GET":
-            student, is_in_class = _is_student(user)
-            teacher, teaches_class = _is_teacher(user)
+        if len(classes) == 0:
+            params["message"] = "No classes found"
+            params["status"] = 404
+        else:
+            params["classes"] = []
+            for clas in classes:
+                params["classes"].append(model_to_dict(clas))
 
-            if student is not None:
-                params["student_classes"] = []
-                for c in student.classes.all():
-                    params["student_classes"].append(
-                        {"class_id": c.id, "class_name": c.name}
-                    )
-            if teacher is not None:
-                params["teacher_classes"] = []
-                for c in Class.objects.filter(teacher=teacher):
-                    params["teacher_classes"].append(
-                        {"class_id": c.id, "class_name": c.name}
-                    )
-
-        return Response(params, status=200)
+            params["status"] = 200
+        return Response(params, params.get("status", 200))
 
 
 class enrolled(APIView):
@@ -253,14 +251,53 @@ class get_class(APIView):
 
 
 class create_class(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAdminUser)
 
     def post(self, request):
         params = {}
 
-        x = request.data.get("class_id", None)
-        params["test"] = x
-        return Response(params, status=200)
+        clas = ClassSerializer(data=request.data)
+        if clas.is_valid() is True:
+            class_obj = clas.save()
+            params["message"] = "Class successfully created"
+            params["status"] = 200
+            params["info"] = model_to_dict(class_obj)
+        else:
+            params["message"] = "Invalid parameters passed"
+            params["status"] = 400
+            params["errors"] = clas.errors
+        return Response(params, status=params.get("status", 200))
+
+
+class update_class(APIView):
+    permission_classes = (IsAuthenticated, IsAdminUser)
+
+    def post(self, request):
+        params = {}
+
+        class_id = request.data.get("id")
+        try:
+            class_obj = Class.objects.get(id=class_id)
+        except Class.DoesNotExist:
+            params["message"] = f"Class with id {class_id} does not exist"
+            params["status"] = 404
+        else:
+            class_dict = model_to_dict(class_obj)
+            # Droplet count not updating....why?
+            class_dict.update(request.data)
+            clas = ClassSerializer(class_obj, data=class_dict)
+            if clas.is_valid() is True:
+                class_obj_save = clas.save()
+                params["status"] = 200
+                params["message"] = "Class was updated successfully"
+                params["info"] = model_to_dict(class_obj_save)
+            else:
+                params[
+                    "message"
+                ] = "Invalid parameters passed. You must data for every class field."
+                params["status"] = 400
+                params["errors"] = clas.errors
+        return Response(params, status=params.get("status", 200))
 
 
 # local helper functions
