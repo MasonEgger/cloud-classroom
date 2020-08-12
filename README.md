@@ -13,13 +13,14 @@ resources students use.
 1. Create a Python virtual environment in your home directory `python3 -m venv ~/do-classroom`
 2. Activate the environment `source ~/do-classroom/bin/activate`
 3. Install Python requirements `pip install -r do_classroom/requirements.txt`
-4. Setup DB by making migrations `python do_classroom/manage.py migrate`
-5. Create a superuser for testing `python do_classroom/manage.py createsuperuser`
-6. Create an `env` file for environment variables as shown in `env.example`
+4. Create an `env` file for environment variables as shown in `env.example`
+    * Set `DEBUG=True`
     * Add a DigitalOcean API key to the file as `DO_TOKEN`
     * Generate a secret key using `python generate_secret_key.py` and add it to the env file as DJANGO_SECRET_KEY
     * If you plan on accessing from an IP address or DNS name that isn't localhost add that to DJANGO_ALLOWED_HOSTS
-7. Export the env vars `export $(grep -v '^#' env | xargs)`
+5. Export the env vars `export $(grep -v '^#' env | xargs)`
+6. Setup DB by making migrations `python do_classroom/manage.py migrate`
+7. Create a superuser for testing `python do_classroom/manage.py createsuperuser`
 8. Run the server `python do_classroom/manage.py runserver 0.0.0.0:8000`
 
 # Issues this solves
