@@ -9,12 +9,13 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-
+from django.core.management.utils import get_random_secret_key
 import os
 import logging.config
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -22,7 +23,7 @@ DEBUG = os.getenv("DEBUG", False)
 # DEBUG = False
 
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 ALLOWED_HOSTS = os.getenv(
     "DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost"
