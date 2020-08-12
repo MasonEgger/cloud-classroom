@@ -124,7 +124,7 @@ WSGI_APPLICATION = "do_classroom.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-if os.environ.get("DEVELOPMENT_MODE", False) is True:
+if os.environ.get("DEVELOPMENT_MODE", "False") == "True":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -187,22 +187,3 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "swagger-docs"),)
 
 DO_TOKEN = os.getenv("DO_TOKEN", "")
-
-#CORS_ORIGIN_ALLOW_ALL = True
-#CORS_ALLOW_CREDENTIALS = True
-#CORS_ORIGIN_WHITELIST = [
-#    "http://127.0.0.1:3000",
-#    "http://localhost:3000",
-#    "http://localhost:8000",
-#]
-
-#WEBPACK_LOADER = {
-#    "DEFAULT": {
-#        "CACHE": not DEBUG,
-#        "BUNDLE_DIR_NAME": "dist/",
-#        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
-#        "POLL_INTERVAL": 0.1,
-#        "TIMEOUT": None,
-#        "IGNORE": [".*\.hot-update.js", ".+\.map"],
-#    }
-#}

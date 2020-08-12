@@ -85,28 +85,6 @@ class get_open_classes(APIView):
         return Response(params, params.get("status", 200))
 
 
-class list_classes(APIView):
-    """
-    This method returns all of the classes. This is an Admin Only Feature
-    """
-
-    permission_classes = (IsAuthenticated, IsAdminUser)
-
-    def get(self, request):
-        classes = Class.objects.all()
-        params = {}
-        if len(classes) == 0:
-            params["message"] = "No classes found"
-            params["status"] = 404
-        else:
-            params["classes"] = []
-            for clas in classes:
-                params["classes"].append(model_to_dict(clas))
-
-            params["status"] = 200
-        return Response(params, params.get("status", 200))
-
-
 class enrolled(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -250,6 +228,10 @@ class get_class(APIView):
         return Response(params, status=200)
 
 
+################################################################################
+# Admin Methods                                                                #
+################################################################################
+
 class create_class(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
 
@@ -268,6 +250,26 @@ class create_class(APIView):
             params["errors"] = clas.errors
         return Response(params, status=params.get("status", 200))
 
+class list_classes(APIView):
+    """
+    This method returns all of the classes. This is an Admin Only Feature
+    """
+
+    permission_classes = (IsAuthenticated, IsAdminUser)
+
+    def get(self, request):
+        classes = Class.objects.all()
+        params = {}
+        if len(classes) == 0:
+            params["message"] = "No classes found"
+            params["status"] = 404
+        else:
+            params["classes"] = []
+            for clas in classes:
+                params["classes"].append(model_to_dict(clas))
+
+            params["status"] = 200
+        return Response(params, params.get("status", 200))
 
 class update_class(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
@@ -297,6 +299,23 @@ class update_class(APIView):
                 ] = "Invalid parameters passed. You must data for every class field."
                 params["status"] = 400
                 params["errors"] = clas.errors
+        return Response(params, status=params.get("status", 200))
+
+class delete_class(APIView):
+    permission_classes = (IsAuthenticated, IsAdminUser)
+
+    def delete(self, request, class_id):
+        params = {}
+        try:
+            class_obj = Class.objects.get(id=class_id)
+        except Class.DoesNotExist:
+            params["message"] = f"Class with id {class_id} does not exist"
+            params["status"] = 404
+        else:
+            class_obj.delete()
+            params["message"] = "Class was successfully deleted"
+            params["status"] = 200
+        
         return Response(params, status=params.get("status", 200))
 
 
