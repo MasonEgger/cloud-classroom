@@ -14,6 +14,7 @@ resources students use.
 2. Activate the environment `source ~/do-classroom/bin/activate`
 3. Install Python requirements `pip install -r do_classroom/requirements.txt`
 4. Create an `env` file for environment variables as shown in `env.example`
+    * Set `DEBUG=True`
     * Add a DigitalOcean API key to the file as `DO_TOKEN`
     * Generate a secret key using `python generate_secret_key.py` and add it to the env file as DJANGO_SECRET_KEY
     * If you plan on accessing from an IP address or DNS name that isn't localhost add that to DJANGO_ALLOWED_HOSTS
