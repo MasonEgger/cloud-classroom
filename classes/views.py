@@ -45,8 +45,8 @@ class get_classes(APIView):
             params["classes"]["teacher"] = teacher_classes
 
         if (
-            not params["classes"]["student"]
-            and not params["classes"]["teacher"]
+            params["classes"].get("student", None) is None
+            and params["classes"].get("teacher", None) is None
         ):
             params["message"] = "No classes found"
             params["status"] = 404
