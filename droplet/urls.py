@@ -10,11 +10,7 @@ urlpatterns = [
         name="assign",
     ),
     path("create/<int:class_id>", views.create.as_view(), name="create"),
-    # path(
-    #    "create/<int:class_id>/<int:count>",
-    #    views.create.as_view(),
-    #    name="create",
-    # ),
+    path("create/<int:class_id>/<int:count>", views.create.as_view(), name="create",),
     path("delete/<int:droplet_id>", views.delete.as_view(), name="delete"),
     path("delete-all", views.delete_all.as_view(), name="delete_all"),
     path(

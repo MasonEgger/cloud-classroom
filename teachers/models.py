@@ -5,9 +5,7 @@ from django.conf import settings
 
 
 class Teacher(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING
-    )
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     classes = models.ManyToManyField(Class)
     droplet_limit = models.IntegerField()
 

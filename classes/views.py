@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.forms.models import model_to_dict
+from classes.utils.class_utils import class_exists
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from classes.models import Class
 from classes.serializers import ClassSerializer
@@ -73,9 +74,7 @@ class get_open_classes(APIView):
             params["classes"] = []
             for clas in classes:
                 if clas.allow_registration is True:
-                    params["classes"].append(
-                        {"name": clas.name, "id": clas.id}
-                    )
+                    params["classes"].append({"name": clas.name, "id": clas.id})
             if not params["classes"]:
                 params["status"] = 404
                 params["message"] = "No classes open for registration"
@@ -100,12 +99,11 @@ class enrolled(APIView):
             params["status"] = 401
             return Response(params, params["status"])
 
-        try:
-            c = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
-            params["message"] = "Invalid class"
+        c = class_exists(class_id)
+        if c is None:
+            params["message"] = f"Class with id {class_id} does not exist"
             params["status"] = 404
-            return Response(params, params["status"])
+            return Response(params, status=params["status"])
 
         if c in user_data["user"].classes.all():
             params["message"] = "Student is enrolled."
@@ -140,12 +138,11 @@ class enroll(APIView):
             params["status"] = 400
             return Response(params, params["status"])
 
-        try:
-            c = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
-            params["message"] = "Invalid class"
+        c = class_exists(class_id)
+        if c is None:
+            params["message"] = f"Class with id {class_id} does not exist"
             params["status"] = 404
-            return Response(params, params["status"])
+            return Response(params, status=params["status"])
 
         if c.allow_registration is False:
             params["message"] = "Class not configured for registration"
@@ -157,9 +154,7 @@ class enroll(APIView):
         print(user_data)
 
         if user_data["teaches_class"] is True:
-            params[
-                "message"
-            ] = "User teaches this class, therefore cannot enroll"
+            params["message"] = "User teaches this class, therefore cannot enroll"
             params["status"] = 401
             return Response(params, params["status"])
 
@@ -197,11 +192,11 @@ class get_class(APIView):
     def get(self, request, class_id):
         params = {}
         user = request.user
-        try:
-            c = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
-            params["message"] = "Invalid class"
-            return Response(params, status=404)
+        c = class_exists(class_id)
+        if c is None:
+            params["message"] = f"Class with id {class_id} does not exist"
+            params["status"] = 404
+            return Response(params, status=params["status"])
 
         student, is_in_class = _is_student(user, c)
         teacher, teaches_class = _is_teacher(user, c)
@@ -232,6 +227,7 @@ class get_class(APIView):
 # Admin Methods                                                                #
 ################################################################################
 
+
 class create_class(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
 
@@ -249,6 +245,7 @@ class create_class(APIView):
             params["status"] = 400
             params["errors"] = clas.errors
         return Response(params, status=params.get("status", 200))
+
 
 class list_classes(APIView):
     """
@@ -271,6 +268,7 @@ class list_classes(APIView):
             params["status"] = 200
         return Response(params, params.get("status", 200))
 
+
 class update_class(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
 
@@ -278,44 +276,46 @@ class update_class(APIView):
         params = {}
 
         class_id = request.data.get("id")
-        try:
-            class_obj = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
+
+        class_obj = class_exists(class_id)
+        if class_obj is None:
             params["message"] = f"Class with id {class_id} does not exist"
             params["status"] = 404
+            return Response(params, status=params["status"])
+
+        class_dict = model_to_dict(class_obj)
+        # Droplet count not updating....why?
+        class_dict.update(request.data)
+        clas = ClassSerializer(class_obj, data=class_dict)
+        if clas.is_valid() is True:
+            class_obj_save = clas.save()
+            params["status"] = 200
+            params["message"] = "Class was updated successfully"
+            params["info"] = model_to_dict(class_obj_save)
         else:
-            class_dict = model_to_dict(class_obj)
-            # Droplet count not updating....why?
-            class_dict.update(request.data)
-            clas = ClassSerializer(class_obj, data=class_dict)
-            if clas.is_valid() is True:
-                class_obj_save = clas.save()
-                params["status"] = 200
-                params["message"] = "Class was updated successfully"
-                params["info"] = model_to_dict(class_obj_save)
-            else:
-                params[
-                    "message"
-                ] = "Invalid parameters passed. You must data for every class field."
-                params["status"] = 400
-                params["errors"] = clas.errors
+            params[
+                "message"
+            ] = "Invalid parameters passed. You must data for every class field."
+            params["status"] = 400
+            params["errors"] = clas.errors
         return Response(params, status=params.get("status", 200))
+
 
 class delete_class(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     def delete(self, request, class_id):
         params = {}
-        try:
-            class_obj = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
-            params["message"] = f"Class with id {class_id} does not exist"
+        class_obj = class_exists(class_id)
+        if class_obj is None:
+            params["message"] = "Invalid class"
             params["status"] = 404
-        else:
-            class_obj.delete()
-            params["message"] = "Class was successfully deleted"
-            params["status"] = 200
-        
+            return Response(params, status=params["status"])
+
+        class_obj.delete()
+        params["message"] = "Class was successfully deleted"
+        params["status"] = 200
+
         return Response(params, status=params.get("status", 200))
 
 

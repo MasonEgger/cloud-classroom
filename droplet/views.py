@@ -1,13 +1,13 @@
 from django.conf import settings
 from classes.models import Class
+from classes.utils.class_utils import class_exists
 from students.models import Student
 from teachers.models import Teacher
 from droplet.models import Droplet
 from users.models import User
 from users.utils import get_user_role
+from django.forms.models import model_to_dict
 from droplet.utils.do_utils import (
-    add_droplet,
-    destroy,
     power_off,
     power_on,
     power_status,
@@ -30,6 +30,9 @@ class create(APIView):
         request_user = request.user
 
         user_data = get_user_role(request_user)
+
+        # If user data is False then the user is neither a teacher or student
+        # and cannot create a droplet.
         if user_data[0] is False:
             return Response(user_data[1], status=user_data[1]["status"])
 
@@ -42,17 +45,15 @@ class create(APIView):
             ] = "Invalid amount for count. Can't be less than 1 or greater than 20"
             params["status"] = 400
             return Response(params, status=params["status"])
-        try:
-            clas = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
+
+        clas = class_exists(class_id)
+        if clas is None:
             params["message"] = "Invalid class"
             params["status"] = 404
             return Response(params, status=params["status"])
 
         if clas in user.classes.all():
-            droplets = Droplet.objects.filter(
-                owner=user.user, class_id=clas.id
-            )
+            droplets = Droplet.objects.filter(owner=user.user, class_id=clas.id)
             if user_data["is_teacher"]:
                 if count + len(droplets) > user.droplet_limit:
                     params["status"] = 403
@@ -64,13 +65,18 @@ class create(APIView):
                     params["message"] = "Max number of droplets reached"
                     return Response(params, status=params["status"])
 
-            params["droplet_info"] = []
+            params["droplets"] = []
             for i in range(0, count):
-                params["droplet_info"].append(
-                    add_droplet(settings.DO_TOKEN, clas, user.user)
-                )
-            clas.droplet_count = clas.droplet_count + count
-            clas.save()
+                droplet = Droplet(owner=user.user, class_id=clas)
+                droplet.save()
+                droplet_info = model_to_dict(droplet)
+                del droplet_info["image"]
+                del droplet_info["id"]
+                del droplet_info["owner"]
+                droplet_info["class"] = droplet.class_id.name
+                params["droplets"].append(droplet_info)
+                params["droplet_count"] = count
+
             params["message"] = "Droplet(s) created"
             params["status"] = 200
             # params["droplet-id"].append(droplet_id)
@@ -99,14 +105,16 @@ class delete(APIView):
             params["message"] = "Invalid droplet"
             params["status"] = 404
             return Response(params, status=params["status"])
+        # TODO: Only if the droplet is in the teachers class should the
+        # TODO: teacher be able to delete it
         if user_data["is_teacher"] is True:
-            destroy(settings.DO_TOKEN, droplet_id)
+            droplet.delete()
             params["message"] = "Successfully deleted Droplet"
             params["status"] = 200
         else:
             droplets = Droplet.objects.filter(owner=user.user)
             if droplet in droplets:
-                destroy(settings.DO_TOKEN, droplet_id)
+                droplet.delete()
                 params["message"] = "Successfully deleted Droplet"
                 params["status"] = 200
             else:
@@ -136,11 +144,7 @@ class delete_all(APIView):
             return Response(params, status=params["status"])
 
         for droplet in droplets:
-            p = Process(
-                target=destroy, args=(settings.DO_TOKEN, droplet.droplet_id),
-            )
-            p.start()
-        p.join()
+            droplet.delete()
 
         params["message"] = "{0} droplets deleted".format(len(droplets))
         params["num_droplets_deleted"] = len(droplets)
@@ -195,8 +199,7 @@ class view(APIView):
             # get the base class user id for both. User is either a student
             # or teacher, where the droplet owner is a Foreign key to a user.
             if user.user.id == droplet.owner.id or (
-                user_data["is_teacher"] is True
-                and droplet.class_id in teacher_classes
+                user_data["is_teacher"] is True and droplet.class_id in teacher_classes
             ):
                 params["droplet"] = {
                     "name": droplet.name,
@@ -211,9 +214,7 @@ class view(APIView):
                 }
                 params["status"] = 200
             else:
-                params[
-                    "message"
-                ] = "User doesn't have permission to view droplet"
+                params["message"] = "User doesn't have permission to view droplet"
                 params["status"] = 403
 
         return Response(params, status=params["status"])
@@ -226,9 +227,8 @@ class view_class_droplets(APIView):
         params = {}
         request_user = request.user
 
-        try:
-            clas = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
+        clas = class_exists(class_id)
+        if clas is None:
             params["message"] = "Invalid class"
             params["status"] = 404
             return Response(params, status=params["status"])
@@ -246,9 +246,7 @@ class view_class_droplets(APIView):
             return Response(params, status=params["status"])
 
         if user_data["teaches_class"] is not True:
-            params[
-                "message"
-            ] = "Only official class teachers can view class droplets"
+            params["message"] = "Only official class teachers can view class droplets"
             params["status"] = 403
             return Response(params, status=params["status"])
 
@@ -279,9 +277,8 @@ class view_my_class_droplets(APIView):
         params = {}
         request_user = request.user
 
-        try:
-            clas = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
+        clas = class_exists(class_id)
+        if clas is None:
             params["message"] = "Invalid class"
             params["status"] = 404
             return Response(params, status=params["status"])
@@ -321,9 +318,8 @@ class class_droplet_count(APIView):
         params = {}
         request_user = request.user
 
-        try:
-            clas = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
+        clas = class_exists(class_id)
+        if clas is None:
             params["message"] = "Invalid class"
             params["status"] = 404
             return Response(params, status=params["status"])
@@ -380,8 +376,7 @@ class power_control(APIView):
         if user_data["is_teacher"] is True:
             teacher_classes = Class.objects.filter(teacher=user)
         if user.user.id == droplet.owner.id or (
-            user_data["is_teacher"] is True
-            and droplet.class_id in teacher_classes
+            user_data["is_teacher"] is True and droplet.class_id in teacher_classes
         ):
             if power_option == "power-off":
                 power_off(settings.DO_TOKEN, droplet_id)
@@ -407,9 +402,7 @@ class power_control(APIView):
                     params["power_status"] = "on"
                     params["status"] = 200
                 else:
-                    params[
-                        "message"
-                    ] = "Droplet power status is unknown by API"
+                    params["message"] = "Droplet power status is unknown by API"
                     params["power_status"] = status
                     params["status"] = 200
 
@@ -479,17 +472,14 @@ class assign(APIView):
             params["status"] = 404
             return Response(params, status=params["status"])
 
-        try:
-            clas = Class.objects.get(id=class_id)
-        except Class.DoesNotExist:
-            params["message"] = "Invalid Class"
+        clas = class_exists(class_id)
+        if clas is None:
+            params["message"] = "Invalid class"
             params["status"] = 404
             return Response(params, status=params["status"])
 
         if clas not in user.classes.all():
-            params[
-                "message"
-            ] = "Only the official class teacher can assign droplets"
+            params["message"] = "Only the official class teacher can assign droplets"
             params["status"] = 403
             return Response(params, status=params["status"])
 

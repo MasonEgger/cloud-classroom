@@ -4,8 +4,7 @@ import string, random
 
 def prefix_generator(size=8):
     return "".join(
-        random.choice(string.ascii_lowercase + string.digits)
-        for i in range(size)
+        random.choice(string.ascii_lowercase + string.digits) for i in range(size)
     )
 
 
@@ -14,10 +13,8 @@ class Class(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     destroyed_at = models.DateTimeField(null=True, blank=True)
     name = models.CharField(max_length=200)
-    droplet_count = models.IntegerField(default=1)
-    prefix = models.CharField(
-        max_length=15, default=prefix_generator, unique=True
-    )
+    droplet_count = models.IntegerField(default=0)
+    prefix = models.CharField(max_length=15, default=prefix_generator, unique=True)
 
     droplet_image = models.CharField(max_length=50)
     droplet_size = models.CharField(max_length=25)

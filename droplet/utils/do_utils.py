@@ -1,5 +1,5 @@
 from teachers.models import Teacher
-from droplet.models import Droplet
+#from droplet.models import Droplet
 from users.models import Profile
 
 import digitalocean
@@ -113,6 +113,8 @@ def power_status(token, droplet_id):
 
 
 def destroy(token, droplet_id):
+    pass
+"""
     droplet = digitalocean.Droplet(token=token, id=droplet_id)
     try:
         droplet.destroy()
@@ -124,10 +126,12 @@ def destroy(token, droplet_id):
         droplet_obj.class_id.droplet_count - 1
     )
     droplet_obj.class_id.save()
-    droplet_obj.delete()
+    droplet_obj.delete() """
 
 
 def list_droplets(token, prefix):
+    pass
+"""
     manager = digitalocean.Manager(token=token)
     all_droplets = manager.get_all_droplets()
     droplets = []
@@ -136,10 +140,12 @@ def list_droplets(token, prefix):
             d.initial_pass = Droplet.objects.get(droplet_id=d.id).initial_pwd
             droplets.append(d)
 
-    return droplets
+    return droplets """
 
 
 def add_droplet(token, class_obj, owner):
+    pass
+"""
     size = class_obj.droplet_size
 
     user = "ubuntu"
@@ -202,11 +208,12 @@ def add_droplet(token, class_obj, owner):
         "droplet_ip": droplet.ip_address,
         "user": user,
         "initial_password": pwd,
-    }
+    } """
 
 
 def end_class(token, class_obj):
-    droplets = Droplet.objects.filter(group=class_obj)
+    pass
+"""     droplets = Droplet.objects.filter(group=class_obj)
     for d in droplets:
         if not d.destroyed_at:
             droplet = digitalocean.Droplet(token=token, id=d.droplet_id)
@@ -216,7 +223,7 @@ def end_class(token, class_obj):
             except NotFoundError:
                 pass
     class_obj.destroyed_at = datetime.now()
-    class_obj.save()
+    class_obj.save() """
 
 
 cloud_config = """
