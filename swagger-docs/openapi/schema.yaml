@@ -144,6 +144,7 @@ paths:
     get:
       tags:
       - classes
+      description: "Returns details about teacher and droplets of class with given class id, if the user is a student or teacher in the class"
       operationId: classes_read
       parameters:
       - name: class_id
@@ -154,7 +155,47 @@ paths:
       responses:
         200:
           description: ""
-          content: {}
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Class's name
+                    example: "class_name"
+                  droplet_image:
+                    type: string
+                    description: Droplet image
+                  droplet_size:
+                    type: string
+                    description: Droplet size
+                  droplet_region:
+                    type: string
+                    description: Droplet region
+                  droplet_limit:
+                    type: integer
+                    description: Droplet student limit
+                  teacher(s):
+                    type: array
+                    items:
+                      type: string
+                      example: "Lastname, Firstname"
+        404:
+          description: "Class with id {class_id} does not exist"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: Class with id {class_id} does not exist
+                  status:
+                    type: integer
+                    description: HTTP error not found code
+                    example: 404
   /classes/create:
     post:
       tags:
