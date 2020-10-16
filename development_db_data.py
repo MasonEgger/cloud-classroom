@@ -89,3 +89,7 @@ student2.classes.add(class1, class2)
 student3 = Student(user=user5)
 student3.save()
 student3.classes.add(class1)
+
+student4 = Student(user=user6)
+student4.save()
+student4.classes.add(class1)
