@@ -295,7 +295,7 @@ paths:
                     example: Invalid class
                   status:
                     type: integer
-                    description: HTTP success code
+                    description: HTTP error code
                     example: 404
   /classes/enrolled:
     get:
@@ -304,8 +304,51 @@ paths:
       operationId: classes_enrolled
       responses:
         200:
-          description: "Check enrollment in a class"
-          content: {}
+          description: "Check enrollment in a class. User is a student and is enrolled."
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive message
+                    example: "Student is enrolled."
+                  status:
+                    type: integer
+                    description: HTTP code
+                    example: 200
+        401:
+          description: "User is not a student, or user is not enrolled"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive message
+                    example: "User is not a student, therefore cannot be enrolled in a class"
+                  status:
+                    type: integer
+                    description: HTTP code
+                    example: 401
+                    
+        404:
+          description: "Class with id {class_id} does not exist"
+          content:
+             application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Descriptive error message
+                    example: "Class with id {class_id} does not exist"
+                  status:
+                    type: integer
+                    description: HTTP error code
+                    example: 404
   /droplets/assign/{droplet_id}/{user_id}/{class_id}:
     get:
       tags:
