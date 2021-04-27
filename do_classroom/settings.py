@@ -25,9 +25,7 @@ DEBUG = os.getenv("DEBUG", False)
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
-ALLOWED_HOSTS = os.getenv(
-    "DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost"
-).split(",")
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 # Logging Configuration
 
@@ -49,10 +47,7 @@ logging.config.dictConfig(
             },
         },
         "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "console",
-            },
+            "console": {"class": "logging.StreamHandler", "formatter": "console",},
         },
         "loggers": {"": {"level": LOGLEVEL, "handlers": ["console",],},},
     }
@@ -69,15 +64,16 @@ INSTALLED_APPS = [
     # Third-Party apps
     "rest_framework",
     "rest_framework.authtoken",
-    #"drf_yasg",
-    #"webpack_loader",
+    # "drf_yasg",
+    # "webpack_loader",
     # local
     "users.apps.UsersConfig",
     "droplet.apps.DropletConfig",
     "classes.apps.ClassesConfig",
     "students.apps.StudentsConfig",
     "teachers.apps.TeachersConfig",
-    #"corsheaders",
+    # "corsheaders",
+    "drf_spectacular",
 ]
 
 REST_FRAMEWORK = {
@@ -86,10 +82,11 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 MIDDLEWARE = [
-    #"corsheaders.middleware.CorsMiddleware",
+    # "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -132,17 +129,17 @@ if os.environ.get("DEVELOPMENT_MODE", "False") == "True":
         }
     }
 else:
-  DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
-        "HOST": os.environ.get("DB_HOST"),
-        "PORT": os.environ.get("DB_PORT"),
-        "OPTIONS": {"sslmode": "require"},
-     }
-}
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": os.environ.get("DB_NAME"),
+            "USER": os.environ.get("DB_USER"),
+            "PASSWORD": os.environ.get("DB_PASSWORD"),
+            "HOST": os.environ.get("DB_HOST"),
+            "PORT": os.environ.get("DB_PORT"),
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
 
 AUTH_USER_MODEL = "users.User"
 
@@ -153,15 +150,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
 
@@ -187,3 +178,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "swagger-docs"),)
 
 DO_TOKEN = os.getenv("DO_TOKEN", "")
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
