@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     # Apps
     "users.apps.UsersConfig",
+    "classes.apps.ClassesConfig",
 ]
 
 MIDDLEWARE = [
