@@ -24,6 +24,15 @@ resources students use.
 7. Create a superuser for testing `python do_classroom/manage.py createsuperuser`
 8. Run the server `python do_classroom/manage.py runserver 0.0.0.0:8000`
 
+### Build and Run in docker compose.
+Set any additional environment vairables needed in .env-compose
+
+To build and run a local docker image, run the below commands:
+
+```
+docker-compose build && docker-compose up
+```
+
 # Issues this solves
 * Removes the need for every student to have an account to use the resources
    * Collegiate - Not all students have credit cards. This could be a barrier
