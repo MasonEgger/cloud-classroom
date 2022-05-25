@@ -46,7 +46,7 @@ psycopg2-binary==2.8.5
 ptyprocess==0.6.0
 pycparser==2.19
 Pygments==2.7.4
-PyJWT==1.7.1
+PyJWT==2.4.0
 pylint==2.4.3
 pylint-django==2.0.13
 pylint-plugin-utils==0.6
