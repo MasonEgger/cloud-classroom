@@ -1,0 +1,185 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cloud-classroom"
+version = "2.0.0"
+description = "API proxy between DigitalOcean infrastructure and students for classroom resource management"
+authors = [
+    { name = "Mason Egger", email = "mason@masonegger.com" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+    "django>=5.0,<5.1",
+    "django-htmx>=1.17",
+    "django-ninja>=1.1", # Modern Django API framework with type hints
+    "psycopg[binary]>=3.1", # Modern PostgreSQL adapter
+    "python-decouple>=3.8", # For environment variables
+    "aiohttp>=3.9", # For async DigitalOcean API calls
+    "pydantic>=2.5", # Data validation
+    "pydantic-settings>=2.1", # Settings management
+    "sshpubkeys>=3.3", # SSH key validation
+    "gunicorn>=21.2", # Production server
+    "whitenoise>=6.6", # Static file serving
+    "django-tailwind>=3.8", # Tailwind CSS integration
+    "django-browser-reload>=1.12", # Development auto-reload
+    "python-multipart>=0.0.6", # File upload support
+    "httpx>=0.25", # Modern HTTP client
+    "structlog>=24.1", # Structured logging
+    "django-allauth>=0.61", # Authentication
+    "django-crispy-forms>=2.1", # Form rendering
+    "crispy-tailwind>=1.0", # Tailwind for crispy forms
+    "django-compressor>=4.4", # Asset compression
+    "django-debug-toolbar>=4.2", # Development debugging
+    "django-extensions>=3.2", # Additional Django commands
+    "python-jose[cryptography]>=3.3", # JWT support
+    "temporalio>=1.4", # Temporal workflow engine
+    "django-environ>=0.11", # Environment variables
+    "cookiecutter>=2.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.3",
+    "pre-commit>=3.6",
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.1",
+    "coverage[toml]>=7.4",
+    "factory-boy>=3.3",
+    "faker>=22.0",
+    "django-stubs[compatible-mypy]>=4.2",
+    "types-python-jose",
+    "types-requests",
+    "ipython>=8.20",
+    "django-silk>=5.1",  # Performance profiling
+]
+
+[project.urls]
+Repository = "https://github.com/MasonEgger/cloud-classroom"
+Issues = "https://github.com/MasonEgger/cloud-classroom/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "users",
+    "classes", 
+    "droplet",
+    "students",
+    "teachers",
+    "resources",
+    "authentication",
+    "services",
+    "do_classroom"
+]
+include = [
+    "manage.py",
+    "development_db_data.py",
+    "generate_secret_key.py",
+    "runtime.txt"
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "N",    # pep8-naming
+    "B",    # flake8-bugbear
+    "S",    # flake8-bandit
+    "A",    # flake8-builtins
+    "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimez
+    "DJ",   # flake8-django
+    "EM",   # flake8-errmsg
+    "G",    # flake8-logging
+    "PIE",  # flake8-pie
+    "T20",  # flake8-print
+    "RUF",  # Ruff-specific rules
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "S101",  # use of assert (needed for tests)
+    "S105",  # hardcoded password checks (false positives)
+    "S106",  # hardcoded password checks (false positives)
+    "G004",  # logging f-strings (we want these)
+    "DJ001", # null=True on CharField (legacy code)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*/tests/*" = ["S101", "S105", "S106"]
+"*/migrations/*" = ["E501"]
+"development_db_data.py" = ["S311", "T201"]  # Allow random and print in dev data
+
+[tool.ruff.lint.isort]
+known-first-party = ["cloud_classroom", "users", "classes", "droplet", "students", "teachers", "resources", "authentication", "services"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "test_settings"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+addopts = [
+    "--strict-markers",
+    "--reuse-db",
+    "--nomigrations",
+]
+testpaths = ["tests"]
+norecursedirs = [".git", ".tox", "dist", "build", "*.egg", "venv", "__pycache__"]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/virtualenv/*",
+    "*/site-packages/*",
+    "*/distutils/*",
+    "manage.py",
+    "*/settings/*",
+    "*/urls.py",
+    "*/wsgi.py",
+    "*/asgi.py",
+    "*/apps.py",
+    "*/admin.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = true
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main"]
+ignore_missing_imports = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+check_untyped_defs = true
+no_implicit_reexport = true
+
+[tool.django-stubs]
+django_settings_module = "cloud_classroom.settings"

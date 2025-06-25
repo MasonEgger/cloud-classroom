@@ -1,7 +1,7 @@
-from django.db import models
-from django.contrib.auth.models import User
-from classes.models import Class
 from django.conf import settings
+from django.db import models
+
+from classes.models import Class
 
 
 class Student(models.Model):
@@ -9,4 +9,4 @@ class Student(models.Model):
     classes = models.ManyToManyField(Class)
 
     def __str__(self):
-        return "{0}, {1}".format(self.user.last_name, self.user.first_name)
+        return f"{self.user.last_name}, {self.user.first_name}"

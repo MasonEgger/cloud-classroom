@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from classes.models import Class, prefix_generator
+
+from classes.models import Class
 
 
 class ClassSerializer(serializers.ModelSerializer):
@@ -28,4 +29,3 @@ class ClassSerializer(serializers.ModelSerializer):
             "allow_registration": {"required": False},
             "force_teacher_ssh_key": {"required": False},
         }
-

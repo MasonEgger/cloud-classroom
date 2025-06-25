@@ -1,0 +1,18 @@
+# Refactor Ideas
+- Change from Django Rest Framework to FastAPI or a pure Django Application
+	- Reasons for FastAPI
+		- It's modern
+		- It's async first, which will be very important later
+	- Reasons for Django
+		- I'm familiar with it
+		- I like it
+		- I like the ORM much more than SQLAlchemy, which is typically the ORM you need for non-django projects
+- Build the front end entirely in HTMX and Tailwind CSS
+	- Minimize JS to as little as necessary. HTMX solves this
+	- When you need JS, use Alpine.js
+- Don't use the `python-digitalocean` library
+	- This isn't supported by DigitalOcean and is rarely updated
+	- Use pure DigitalOcean REST API commands
+	- When doing so, do not use `requests`, but an async safe library like `aiohttp`
+- Build as a Temporal application
+- Update to modern Python package tooling: `uv`

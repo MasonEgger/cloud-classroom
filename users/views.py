@@ -1,13 +1,14 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from droplet.views import get_user_role
-from students.models import Student
-from classes.models import Class
-from droplet.models import Droplet
-from users.models import User
 from django.db.utils import IntegrityError
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from classes.models import Class
+from droplet.models import Droplet
+from droplet.views import get_user_role
+from students.models import Student
+from users.models import User
 
 # Create your views here.
 
@@ -45,9 +46,9 @@ class view(APIView):
             params["students"] = []
             students = Student.objects.filter(classes=clas)
             for student in students:
-                droplet_count = Droplet.objects.filter(
-                    owner=student.user
-                ).filter(class_id=class_id)
+                droplet_count = Droplet.objects.filter(owner=student.user).filter(
+                    class_id=class_id
+                )
                 student_data = {
                     "first_name": student.user.first_name,
                     "last_name": student.user.last_name,
@@ -82,16 +83,12 @@ class register(APIView):
         ):
             clas = Class.objects.filter(name=class_name, prefix=passcode)
             if len(clas) != 1:
-                params[
-                    "message"
-                ] = "Class with that name and passcode was not found"
+                params["message"] = "Class with that name and passcode was not found"
                 params["status"] = 404
                 return Response(params, status=params.get("status", 200))
 
             if clas[0].allow_registration is False:
-                params[
-                    "message"
-                ] = "Class is not allowing registration at this time."
+                params["message"] = "Class is not allowing registration at this time."
                 params["status"] = 403
                 return Response(params, status=params.get("status", 200))
 
@@ -103,9 +100,7 @@ class register(APIView):
                     password=passcode,
                 )
             except IntegrityError:
-                params[
-                    "message"
-                ] = "User with that email address already exists"
+                params["message"] = "User with that email address already exists"
                 params["status"] = 403
                 return Response(params, status=params.get("status", 200))
 
@@ -118,9 +113,9 @@ class register(APIView):
             params["api_token"] = token.key
             params["status"] = 200
         else:
-            params[
-                "message"
-            ] = "Missing arguments. email, password, first_name, last_name, class, and passcode are required"
+            params["message"] = (
+                "Missing arguments. email, password, first_name, last_name, class, and passcode are required"
+            )
             params["status"] = 400
 
         return Response(params, status=params.get("status", 200))

@@ -1,29 +1,29 @@
-from django.db import models
-from sshpubkeys import SSHKey
-from django.conf import settings
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.models import BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
-from django.utils.translation import ugettext_lazy as _
-from rest_framework.authtoken.models import Token
+from django.utils.translation import gettext_lazy as _
+from sshpubkeys import SSHKey
+
+# Token creation will be handled by django-allauth or custom implementation
 
 
 def validate_ssh_key(value):
+    """Validate that the provided value is a valid SSH public key."""
     ssh = SSHKey(value)
     try:
         ssh.parse()
-    except:
-        raise ValidationError("The provided key is invalid")
+    except Exception as e:
+        msg = "The provided key is invalid"
+        raise ValidationError(msg) from e
 
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
+# Token creation handled by django-allauth
 
 
 class MyUserManager(BaseUserManager):
@@ -37,7 +37,8 @@ class MyUserManager(BaseUserManager):
         Creates and saves a User with the given email and password.
         """
         if not email:
-            raise ValueError("The Email must be set")
+            msg = "The Email must be set"
+            raise ValueError(msg)
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -50,9 +51,11 @@ class MyUserManager(BaseUserManager):
         extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
+            msg = "Superuser must have is_staff=True."
+            raise ValueError(msg)
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
+            msg = "Superuser must have is_superuser=True."
+            raise ValueError(msg)
         return self._create_user(email, password, **extra_fields)
 
 
@@ -80,7 +83,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
     def get_full_name(self):
-        return "{0}, {1}".format(self.last_name, self.first_name)
+        return f"{self.last_name}, {self.first_name}"
 
     def get_short_name(self):
         return self.email

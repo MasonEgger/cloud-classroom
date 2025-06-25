@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Profile
-from users.forms import CustomUserCreationForm, CustomUserChangeForm
+
+from users.forms import CustomUserChangeForm, CustomUserCreationForm
 from users.models import User
+
+from .models import Profile
 
 # from users.models import User
 
@@ -71,9 +73,7 @@ class CustomUserAdmin(UserAdmin):
     def get_inline_instances(self, request, obj=None):
         if not obj:
             return list()
-        return super(CustomUserAdmin, self).get_inline_instances(
-            request, obj
-        )
+        return super(CustomUserAdmin, self).get_inline_instances(request, obj)
 
 
 admin.site.register(User, CustomUserAdmin)

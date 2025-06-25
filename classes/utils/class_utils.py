@@ -9,4 +9,3 @@ def class_exists(class_id):
         return None
 
     return clas
-

@@ -1,10 +1,11 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.forms.models import model_to_dict
-from classes.utils.class_utils import class_exists
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from classes.models import Class
 from classes.serializers import ClassSerializer
+from classes.utils.class_utils import class_exists
 from students.models import Student
 from teachers.models import Teacher
 from users.utils import get_user_role
@@ -93,9 +94,9 @@ class enrolled(APIView):
         user_data = get_user_role(request_user)[1]
 
         if user_data["is_student"] is False:
-            params[
-                "message"
-            ] = "User is not a student, therefore cannot be enrolled in a class"
+            params["message"] = (
+                "User is not a student, therefore cannot be enrolled in a class"
+            )
             params["status"] = 401
             return Response(params, params["status"])
 
@@ -293,9 +294,9 @@ class update_class(APIView):
             params["message"] = "Class was updated successfully"
             params["info"] = model_to_dict(class_obj_save)
         else:
-            params[
-                "message"
-            ] = "Invalid parameters passed. You must data for every class field."
+            params["message"] = (
+                "Invalid parameters passed. You must data for every class field."
+            )
             params["status"] = 400
             params["errors"] = clas.errors
         return Response(params, status=params.get("status", 200))

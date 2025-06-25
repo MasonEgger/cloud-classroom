@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('classes', '0003_remove_class_teacher'),
+        ("classes", "0003_remove_class_teacher"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='class',
-            name='force_teacher_ssh_key',
+            model_name="class",
+            name="force_teacher_ssh_key",
             field=models.BooleanField(default=False),
         ),
     ]

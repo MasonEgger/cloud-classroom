@@ -1,25 +1,25 @@
+
 from django.conf import settings
+from django.forms.models import model_to_dict
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from classes.models import Class
 from classes.utils.class_utils import class_exists
-from students.models import Student
-from teachers.models import Teacher
 from droplet.models import Droplet
-from users.models import User
-from users.utils import get_user_role
-from django.forms.models import model_to_dict
 from droplet.utils.do_utils import (
     power_off,
     power_on,
     power_status,
 )
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from multiprocessing import Process
+from students.models import Student
+from teachers.models import Teacher
+from users.models import User
+from users.utils import get_user_role
 
 
 class create(APIView):
-
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id, count=1):
@@ -40,9 +40,9 @@ class create(APIView):
         user = user_data["user"]
 
         if count < 1 or count > 20:
-            params[
-                "message"
-            ] = "Invalid amount for count. Can't be less than 1 or greater than 20"
+            params["message"] = (
+                "Invalid amount for count. Can't be less than 1 or greater than 20"
+            )
             params["status"] = 400
             return Response(params, status=params["status"])
 
@@ -66,7 +66,7 @@ class create(APIView):
                     return Response(params, status=params["status"])
 
             params["droplets"] = []
-            for i in range(0, count):
+            for i in range(count):
                 droplet = Droplet(owner=user.user, class_id=clas)
                 droplet.save()
                 droplet_info = model_to_dict(droplet)
@@ -146,7 +146,7 @@ class delete_all(APIView):
         for droplet in droplets:
             droplet.delete()
 
-        params["message"] = "{0} droplets deleted".format(len(droplets))
+        params["message"] = f"{len(droplets)} droplets deleted"
         params["num_droplets_deleted"] = len(droplets)
         params["status"] = 200
 
@@ -334,9 +334,9 @@ class class_droplet_count(APIView):
             user_data["is_in_class"] is not True
             and user_data["teaches_class"] is not True
         ):
-            params[
-                "message"
-            ] = "Only teachers of the class or students in the class can view droplet count"
+            params["message"] = (
+                "Only teachers of the class or students in the class can view droplet count"
+            )
             params["status"] = 403
             return Response(params, status=params["status"])
 
@@ -353,9 +353,9 @@ class power_control(APIView):
         options = ["power-off", "power-on", "status"]
         params = {}
         if power_option.lower() not in options:
-            params[
-                "message"
-            ] = "Incorrect power option. Options are power-on, power-off, and status"
+            params["message"] = (
+                "Incorrect power option. Options are power-on, power-off, and status"
+            )
             params["status"] = 400
             return Response(params, status=params["status"])
         request_user = request.user
@@ -420,7 +420,11 @@ class assign(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(
-        self, request, droplet_id, user_id, class_id,
+        self,
+        request,
+        droplet_id,
+        user_id,
+        class_id,
     ):
         params = {}
         request_user = request.user

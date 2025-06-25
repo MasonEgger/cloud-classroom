@@ -24,8 +24,6 @@ def _is_teacher(user, class_obj=None):
     except Teacher.DoesNotExist:
         teacher = None
     else:
-        print(class_obj)
-        print(teacher.classes.all())
         if class_obj is not None and class_obj in teacher.classes.all():
             teaches_class = True
         else:

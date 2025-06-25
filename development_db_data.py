@@ -1,8 +1,8 @@
-from users.models import User
-from students.models import Student
-from teachers.models import Teacher
 from classes.models import Class
 from droplet.utils.do_utils import mkpasswd
+from students.models import Student
+from teachers.models import Teacher
+from users.models import User
 
 user1 = User(
     email="mmcgonagall@hogwarts.edu",

@@ -1,5 +1,7 @@
+import random
+import string
+
 from django.db import models
-import string, random
 
 
 def prefix_generator(size=8):

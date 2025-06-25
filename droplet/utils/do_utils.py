@@ -1,15 +1,12 @@
-from teachers.models import Teacher
-#from droplet.models import Droplet
-from users.models import Profile
+
+# from droplet.models import Droplet
+
+import crypt
+import json
 
 import digitalocean
-from digitalocean.baseapi import NotFoundError
-import xkcdpass.xkcd_password as xp
-from datetime import datetime
-import time
-import crypt
 import requests
-import json
+import xkcdpass.xkcd_password as xp
 
 API_URL_BASE = "https://api.digitalocean.com/v2/"
 HEADERS_STRING = {
@@ -28,9 +25,7 @@ def hashpwd(pwd):
 
 def mkpasswd():
     words = xp.locate_wordfile()
-    mywords = xp.generate_wordlist(
-        wordfile=words, min_length=5, max_length=8
-    )
+    mywords = xp.generate_wordlist(wordfile=words, min_length=5, max_length=8)
     pwd = xp.generate_xkcdpassword(mywords)
 
     return pwd.lower()
@@ -63,7 +58,7 @@ def list_sizes(token):
 def list_images():
     """
     List of available images.
-    
+
     Some hard coding is needed as images using cloud-init aren't
     specified in the API.
     """
@@ -100,9 +95,9 @@ def power_on(token, droplet_id):
 def power_status(token, droplet_id):
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(token),
+        "Authorization": f"Bearer {token}",
     }
-    api_url = "{0}droplets/{1}".format(API_URL_BASE, droplet_id)
+    api_url = f"{API_URL_BASE}droplets/{droplet_id}"
 
     response = requests.get(api_url, headers=headers)
 
@@ -114,6 +109,8 @@ def power_status(token, droplet_id):
 
 def destroy(token, droplet_id):
     pass
+
+
 """
     droplet = digitalocean.Droplet(token=token, id=droplet_id)
     try:
@@ -131,6 +128,8 @@ def destroy(token, droplet_id):
 
 def list_droplets(token, prefix):
     pass
+
+
 """
     manager = digitalocean.Manager(token=token)
     all_droplets = manager.get_all_droplets()
@@ -145,6 +144,8 @@ def list_droplets(token, prefix):
 
 def add_droplet(token, class_obj, owner):
     pass
+
+
 """
     size = class_obj.droplet_size
 
@@ -213,6 +214,8 @@ def add_droplet(token, class_obj, owner):
 
 def end_class(token, class_obj):
     pass
+
+
 """     droplets = Droplet.objects.filter(group=class_obj)
     for d in droplets:
         if not d.destroyed_at:

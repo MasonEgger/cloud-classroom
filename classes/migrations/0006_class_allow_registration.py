@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('classes', '0005_auto_20200625_2226'),
+        ("classes", "0005_auto_20200625_2226"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='class',
-            name='allow_registration',
+            model_name="class",
+            name="allow_registration",
             field=models.BooleanField(default=False),
         ),
     ]

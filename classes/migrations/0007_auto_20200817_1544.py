@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('classes', '0006_class_allow_registration'),
+        ("classes", "0006_class_allow_registration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='class',
-            name='droplet_count',
+            model_name="class",
+            name="droplet_count",
             field=models.IntegerField(default=0),
         ),
     ]

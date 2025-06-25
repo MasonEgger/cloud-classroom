@@ -1,14 +1,12 @@
-from django.shortcuts import render
+import re
+
+import digitalocean
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 # local imports
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import authentication, permissions
-import json
-import re
-import digitalocean
 
 # model imports
 

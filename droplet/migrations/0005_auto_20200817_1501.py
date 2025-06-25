@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('droplet', '0004_auto_20200817_1500'),
+        ("droplet", "0004_auto_20200817_1500"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='droplet',
-            name='ip_addr',
+            model_name="droplet",
+            name="ip_addr",
             field=models.GenericIPAddressField(blank=True, null=True),
         ),
     ]

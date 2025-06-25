@@ -1,61 +1,134 @@
-{% load static %}
-<!-- HTML for static distribution bundle build -->
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Swagger UI</title>
-    <link rel="stylesheet" type="text/css" href="{% static "openapi/swagger-dist-ui/swagger-ui.css" %}" >
-    <link rel="icon" type="image/png" href="{% static "openapi/swagger-dist-ui/favicon-32x32.png" %}" sizes="32x32" />
-    <link rel="icon" type="image/png" href="{% static "openapi/swagger-dist-ui/favicon-16x16.png" %}" sizes="16x16" />
-    <style>
-      html
-      {
-        box-sizing: border-box;
-        overflow: -moz-scrollbars-vertical;
-        overflow-y: scroll;
-      }
+{% extends "base.html" %}
 
-      *,
-      *:before,
-      *:after
-      {
-        box-sizing: inherit;
-      }
+{% block title %}Home - Cloud Classroom{% endblock %}
 
-      body
-      {
-        margin:0;
-        background: #fafafa;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div id="swagger-ui"></div>
-
-    <script src="{% static "openapi/swagger-dist-ui/swagger-ui-bundle.js" %}"> </script>
-    <script src="{% static "openapi/swagger-dist-ui/swagger-ui-standalone-preset.js" %}"> </script>
-    <script>
-    window.onload = function() {
-      // Begin Swagger UI call region
-      const ui = SwaggerUIBundle({
-        url: "{% static "openapi/schema.yaml" %}", 
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl
-        ],
-        layout: "StandaloneLayout"
-      })
-      // End Swagger UI call region
-
-      window.ui = ui
-    }
-  </script>
-  </body>
-</html>
+{% block content %}
+<div class="bg-white">
+    <!-- Hero Section -->
+    <div class="relative isolate px-6 pt-14 lg:px-8">
+        <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                    Cloud Resources for Education
+                </h1>
+                <p class="mt-6 text-lg leading-8 text-gray-600">
+                    Manage DigitalOcean infrastructure for your classroom without the complexity. 
+                    Give students hands-on cloud experience while maintaining control and oversight.
+                </p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'classroom:dashboard' %}" 
+                           class="rounded-md bg-do-blue px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-do-dark-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-do-blue">
+                            Go to Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{% url 'account_signup' %}" 
+                           class="rounded-md bg-do-blue px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-do-dark-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-do-blue">
+                            Get Started
+                        </a>
+                        <a href="{% url 'account_login' %}" 
+                           class="text-sm font-semibold leading-6 text-gray-900">
+                            Sign in <span aria-hidden="true">→</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <div class="py-24 sm:py-32">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto max-w-2xl lg:text-center">
+                <h2 class="text-base font-semibold leading-7 text-do-blue">Simplified Cloud Management</h2>
+                <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                    Everything you need for classroom cloud computing
+                </p>
+                <p class="mt-6 text-lg leading-8 text-gray-600">
+                    Cloud Classroom removes barriers to teaching cloud infrastructure by handling the complexity of account management, billing, and resource limits.
+                </p>
+            </div>
+            <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+                <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
+                    <div class="relative pl-16">
+                        <dt class="text-base font-semibold leading-7 text-gray-900">
+                            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-do-blue">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                </svg>
+                            </div>
+                            No Individual Accounts Required
+                        </dt>
+                        <dd class="mt-2 text-base leading-7 text-gray-600">
+                            Students don't need credit cards or individual DigitalOcean accounts. Access cloud resources through your institutional account.
+                        </dd>
+                    </div>
+                    <div class="relative pl-16">
+                        <dt class="text-base font-semibold leading-7 text-gray-900">
+                            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-do-blue">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                                </svg>
+                            </div>
+                            Resource Controls
+                        </dt>
+                        <dd class="mt-2 text-base leading-7 text-gray-600">
+                            Set limits on droplet sizes, regions, and quantities. Prevent runaway costs while giving students real cloud experience.
+                        </dd>
+                    </div>
+                    <div class="relative pl-16">
+                        <dt class="text-base font-semibold leading-7 text-gray-900">
+                            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-do-blue">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+                                </svg>
+                            </div>
+                            Class Management
+                        </dt>
+                        <dd class="mt-2 text-base leading-7 text-gray-600">
+                            Organize students into classes with unique configurations. Each class can have its own resource limits and allowed images.
+                        </dd>
+                    </div>
+                    <div class="relative pl-16">
+                        <dt class="text-base font-semibold leading-7 text-gray-900">
+                            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-do-blue">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                                </svg>
+                            </div>
+                            SSH Key Management
+                        </dt>
+                        <dd class="mt-2 text-base leading-7 text-gray-600">
+                            Automatically inject teacher SSH keys into student droplets for support and oversight. Maintain security while enabling assistance.
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CTA Section -->
+    <div class="bg-gray-50">
+        <div class="mx-auto max-w-7xl py-12 px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+            <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                <span class="block">Ready to enhance your classroom?</span>
+                <span class="block text-do-blue">Start using Cloud Classroom today.</span>
+            </h2>
+            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+                <div class="inline-flex rounded-md shadow">
+                    <a href="{% url 'account_signup' %}" 
+                       class="inline-flex items-center justify-center rounded-md border border-transparent bg-do-blue px-5 py-3 text-base font-medium text-white hover:bg-do-dark-blue">
+                        Get Started
+                    </a>
+                </div>
+                <div class="ml-3 inline-flex rounded-md shadow">
+                    <a href="https://github.com/MasonEgger/cloud-classroom" 
+                       class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-5 py-3 text-base font-medium text-do-blue hover:bg-gray-50">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
