@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl w-full space-y-8">
+        <div>
+            <div class="mx-auto h-12 w-12 flex items-center justify-center bg-indigo-100 rounded-full">
+                <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                {% if workshop_code %}{{ workshop_code.name }}{% else %}Workshop Information{% endif %}
+            </h2>
+        </div>
+
+        {% if workshop_code %}
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:px-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Workshop Details</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                        Information about this workshop and registration.
+                    </p>
+                </div>
+                <div class="border-t border-gray-200">
+                    <dl>
+                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Workshop Name</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ workshop_code.name }}</dd>
+                        </div>
+                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Workshop Code</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {{ workshop_code.code }}
+                                </span>
+                            </dd>
+                        </div>
+                        {% if workshop_code.description %}
+                            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">Description</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ workshop_code.description }}</dd>
+                            </div>
+                        {% endif %}
+                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Registration Status</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {% if workshop_code.can_register %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Open for Registration
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Registration Closed
+                                    </span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        {% if workshop_code.max_registrations %}
+                            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">Capacity</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {{ workshop_code.registration_count }} / {{ workshop_code.max_registrations }} participants
+                                </dd>
+                            </div>
+                        {% endif %}
+                        {% if workshop_code.expires_at %}
+                            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                <dt class="text-sm font-medium text-gray-500">Registration Expires</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {{ workshop_code.expires_at|date:"F j, Y \a\t g:i A" }}
+                                    {% if workshop_code.is_expired %}
+                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            Expired
+                                        </span>
+                                    {% endif %}
+                                </dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <div class="text-center space-y-4">
+                {% if workshop_code.can_register %}
+                    <div>
+                        <a href="{% url 'workshop_register' %}" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Register for This Workshop
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">
+                                    Registration Not Available
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>
+                                        {% if workshop_code.is_expired %}
+                                            This workshop registration has expired.
+                                        {% elif not workshop_code.is_active %}
+                                            This workshop is no longer accepting registrations.
+                                        {% elif workshop_code.max_registrations and workshop_code.registration_count >= workshop_code.max_registrations %}
+                                            This workshop has reached its maximum capacity.
+                                        {% else %}
+                                            Registration is currently closed for this workshop.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <a href="{% url 'home' %}" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+
+        {% else %}
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:px-6 text-center">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Workshop Not Found</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500 mx-auto">
+                        The workshop code you're looking for doesn't exist or is no longer active.
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="{% url 'workshop_register' %}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Try Workshop Registration
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

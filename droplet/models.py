@@ -7,9 +7,8 @@ from django.db import models
 if TYPE_CHECKING:
     pass
 
-# TODO: Replace with async DigitalOcean API client
-# import digitalocean
-# from digitalocean.baseapi import NotFoundError
+# NOTE: Legacy python-digitalocean library imports removed
+# Use services.digitalocean.DigitalOceanClient for async API operations
 
 from classes.models import Class
 from users.models import User
@@ -60,6 +59,21 @@ class Droplet(models.Model):
         blank=True,
         help_text="The initial password for the droplet user",
     )
+    size_slug = models.CharField(
+        max_length=64,
+        blank=True,
+        help_text="The DigitalOcean size slug for the droplet",
+    )
+    status = models.CharField(
+        max_length=32,
+        default="new",
+        help_text="The current status of the droplet (new, active, off, archive, etc.)",
+    )
+    destroyed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the droplet was destroyed in DigitalOcean",
+    )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -72,34 +86,8 @@ class Droplet(models.Model):
         return self.name or f"Droplet {self.id}"
 
 
-# TODO: Implement async DigitalOcean droplet management
-# These signals will be replaced with proper async operations using Temporal workflows
-
-# @receiver(pre_save, sender=Droplet)
-# def droplet_create(sender, instance, using, **kwargs):
-#     """Create a DigitalOcean droplet when a Droplet model is saved."""
-#     # Implementation will be moved to async service layer
-#     pass
-
-# @receiver(post_delete, sender=Droplet)
-# def droplet_delete(sender, instance, using, **kwargs):
-#     """Delete a DigitalOcean droplet when a Droplet model is deleted."""
-#     # Implementation will be moved to async service layer
-#     pass
+# NOTE: Droplet lifecycle management is handled by the ClassroomService
+# in services/classroom.py using async DigitalOcean API calls
 
 
-cloud_config = """
-#cloud-config
-users:
-  - name: {}
-    groups: sudo
-    shell: /bin/bash
-    sudo: ['ALL=(ALL:ALL) ALL']
-    lock-passwd: false
-chpasswd:
-  list: |
-    {}:{}
-  expire: {}
-runcmd:
- - passwd -l root
-"""
+# NOTE: cloud_config template removed - use services.classroom.CloudInitTemplate instead

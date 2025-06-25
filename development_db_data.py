@@ -5,53 +5,53 @@ from teachers.models import Teacher
 from users.models import User
 
 user1 = User(
-    email="mmcgonagall@hogwarts.edu",
-    first_name="Minerva",
-    last_name="McGonagall",
+    email="prof.oak@pallet.edu",
+    first_name="Samuel",
+    last_name="Oak",
     is_active=True,
     password=mkpasswd(),
 )
 user1.save()
 
 user2 = User(
-    email="ssnape@hogwarts.edu",
-    first_name="Severus",
-    last_name="Snape",
+    email="prof.elm@newbark.edu",
+    first_name="Elias",
+    last_name="Elm",
     is_active=True,
     password=mkpasswd(),
 )
 user2.save()
 
 user3 = User(
-    email="hpotter@hogwarts.edu",
-    first_name="Harry",
-    last_name="Potter",
+    email="ash.ketchum@pallet.edu",
+    first_name="Ash",
+    last_name="Ketchum",
     is_active=True,
     password=mkpasswd(),
 )
 user3.save()
 
 user4 = User(
-    email="hgranger@hogwarts.edu",
-    first_name="Hermione",
-    last_name="Granger",
+    email="misty.waterflower@cerulean.edu",
+    first_name="Misty",
+    last_name="Waterflower",
     is_active=True,
     password=mkpasswd(),
 )
 user4.save()
 
 user5 = User(
-    email="rweasley@hogwarts.edu",
-    first_name="Ronald",
-    last_name="Weasely",
+    email="brock.harrison@pewter.edu",
+    first_name="Brock",
+    last_name="Harrison",
     is_active=True,
     password=mkpasswd(),
 )
 user5.save()
 
 class1 = Class(
-    prefix="transfig",
-    name="Transfiguration",
+    prefix="pokemon101",
+    name="Pokemon Biology 101",
     droplet_image="ubuntu-20-04-x64",
     droplet_size="s-1vcpu-1gb",
     droplet_region="sfo3",
@@ -60,8 +60,8 @@ class1 = Class(
 class1.save()
 
 class2 = Class(
-    prefix="potions",
-    name="Potions",
+    prefix="battlemech",
+    name="Pokemon Battle Mechanics",
     droplet_image="ubuntu-20-04-x64",
     droplet_size="s-1vcpu-1gb",
     droplet_region="sfo3",

@@ -1,0 +1,48 @@
+<!-- HTMX partial template for dynamic resource options -->
+<div id="resource-options">
+    {% if regions %}
+        <div class="mb-4">
+            <label for="region" class="block text-sm font-medium text-gray-700">Region</label>
+            <select name="region" id="region" 
+                    hx-get="{% url 'classroom:get_sizes_for_region' %}" 
+                    hx-target="#size-options"
+                    hx-trigger="change"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Select a region...</option>
+                {% for region in regions %}
+                    <option value="{{ region.slug }}">{{ region.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endif %}
+    
+    <div id="size-options">
+        {% if sizes %}
+            <div class="mb-4">
+                <label for="size" class="block text-sm font-medium text-gray-700">Droplet Size</label>
+                <select name="size" id="size" 
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Select a size...</option>
+                    {% for size in sizes %}
+                        <option value="{{ size.slug }}">
+                            {{ size.slug }} - ${{ size.price_monthly }}/month
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if images %}
+        <div class="mb-4">
+            <label for="image" class="block text-sm font-medium text-gray-700">Operating System</label>
+            <select name="image" id="image" 
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Select an image...</option>
+                {% for image in images %}
+                    <option value="{{ image.slug }}">{{ image.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endif %}
+</div>

@@ -10,7 +10,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 
 urlpatterns = [
     # Admin interface
@@ -20,12 +20,19 @@ urlpatterns = [
     # Application URLs
     path("auth/", include("authentication.urls")),
     path("classroom/", include("classroom.urls")),
-    # TODO: Fix DRF imports in these apps
-    # path("droplets/", include("droplet.urls")),
-    # path("classes/", include("classes.urls")),
-    # path("resources/", include("resources.urls")),
-    # path("users/", include("users.urls")),
-    # Home page
+    # NOTE: Legacy DRF API endpoints removed - replaced by classroom HTMX views
+]
+
+# Conditional routing based on SIMPLE_AUTH_MODE
+if settings.SIMPLE_AUTH_MODE:
+    # In workshop mode, redirect signup to workshop registration
+    urlpatterns += [
+        path("register/", RedirectView.as_view(pattern_name="authentication:workshop_register"), name="register"),
+        path("workshop/", include("authentication.urls", namespace="workshop")),
+    ]
+
+# Home page
+urlpatterns += [
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
 ]
 

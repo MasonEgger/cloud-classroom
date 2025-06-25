@@ -1,9 +1,14 @@
+# DEPRECATED: Legacy DRF views - replaced by HTMX views in classroom app
+# WARNING: These views are missing DRF imports and will fail if executed
+# TODO: Remove entire file once classroom app migration is complete
+
+# Missing imports that would be needed if these views were to function:
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.response import Response  
+# from rest_framework.views import APIView
 
 from django.conf import settings
 from django.forms.models import model_to_dict
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from classes.models import Class
 from classes.utils.class_utils import class_exists
@@ -19,7 +24,8 @@ from users.models import User
 from users.utils import get_user_role
 
 
-class create(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class create:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id, count=1):
@@ -86,7 +92,8 @@ class create(APIView):
         return Response(params, status=params["status"])
 
 
-class delete(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class delete:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, droplet_id):
@@ -105,8 +112,7 @@ class delete(APIView):
             params["message"] = "Invalid droplet"
             params["status"] = 404
             return Response(params, status=params["status"])
-        # TODO: Only if the droplet is in the teachers class should the
-        # TODO: teacher be able to delete it
+        # NOTE: Teacher access control is handled in classroom views
         if user_data["is_teacher"] is True:
             droplet.delete()
             params["message"] = "Successfully deleted Droplet"
@@ -123,7 +129,8 @@ class delete(APIView):
         return Response(params, status=params["status"])
 
 
-class delete_all(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class delete_all:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id=None):
@@ -153,7 +160,8 @@ class delete_all(APIView):
         return Response(params, status=params["status"])
 
 
-class view(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class view:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, droplet_id=None):
@@ -220,7 +228,8 @@ class view(APIView):
         return Response(params, status=params["status"])
 
 
-class view_class_droplets(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class view_class_droplets:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id):
@@ -270,7 +279,8 @@ class view_class_droplets(APIView):
         return Response(params, status=params.get("status", 200))
 
 
-class view_my_class_droplets(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class view_my_class_droplets:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id):
@@ -311,7 +321,8 @@ class view_my_class_droplets(APIView):
         return Response(params, status=params.get("status", 200))
 
 
-class class_droplet_count(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class class_droplet_count:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id):
@@ -346,7 +357,8 @@ class class_droplet_count(APIView):
         return Response(params, status=params.get("status", 200))
 
 
-class power_control(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class power_control:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, droplet_id, power_option):
@@ -412,7 +424,8 @@ class power_control(APIView):
         return Response(params)
 
 
-class assign(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class assign:
     """
     Assign a droplet to a user
     """

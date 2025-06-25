@@ -45,6 +45,12 @@ class MyUserManager(BaseUserManager):
         user.save()
         return user
 
+    def create_user(self, email, password=None, **extra_fields):
+        """Create and save a regular user with the given email and password."""
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        return self._create_user(email, password, **extra_fields)
+
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
@@ -76,6 +82,43 @@ class User(AbstractBaseUser, PermissionsMixin):
             "Unselect this instead of deleting accounts."
         ),
     )
+    
+    # Workshop-related fields
+    pending_approval = models.BooleanField(
+        default=False,
+        help_text=_("User is pending approval in workshop mode")
+    )
+    registration_method = models.CharField(
+        max_length=20,
+        choices=[
+            ('email', 'Email Registration'),
+            ('workshop_code', 'Workshop Code Registration'),
+        ],
+        default='email',
+        help_text=_("How the user registered")
+    )
+    workshop_code_used = models.ForeignKey(
+        'authentication.WorkshopCode',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='registered_users',
+        help_text=_("Workshop code used for registration")
+    )
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("When the user was approved (for workshop registrations)")
+    )
+    approved_by = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_users',
+        help_text=_("Who approved this user")
+    )
+    
     USERNAME_FIELD = "email"
     objects = MyUserManager()
 
@@ -87,6 +130,24 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email
+    
+    def approve_user(self, approved_by_user):
+        """Approve a workshop user."""
+        from django.utils import timezone
+        self.pending_approval = False
+        self.approved_at = timezone.now()
+        self.approved_by = approved_by_user
+        self.save()
+    
+    @property
+    def is_workshop_user(self):
+        """Check if user registered via workshop code."""
+        return self.registration_method == 'workshop_code'
+    
+    @property
+    def can_login(self):
+        """Check if user can login (not pending approval)."""
+        return self.is_active and not self.pending_approval
 
 
 class Profile(models.Model):

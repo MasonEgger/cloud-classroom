@@ -1,17 +1,22 @@
-from django.forms.models import model_to_dict
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
+# DEPRECATED: Legacy DRF views - replaced by HTMX views in classroom app
+# WARNING: These views are missing DRF imports and will fail if executed
+# TODO: Remove entire file once classroom app migration is complete
 
+# Missing imports that would be needed if these views were to function:
+# from rest_framework.permissions import IsAdminUser, IsAuthenticated  
+# from rest_framework.response import Response
+# from rest_framework.views import APIView
+
+from django.forms.models import model_to_dict
 from classes.models import Class
-from classes.serializers import ClassSerializer
 from classes.utils.class_utils import class_exists
 from students.models import Student
 from teachers.models import Teacher
 from users.utils import get_user_role
 
 
-class get_classes(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class get_classes:
     """
     This method returns all of the classes that:
     * A student is enrolled in
@@ -59,7 +64,8 @@ class get_classes(APIView):
         return Response(params, status=params.get("status", 200))
 
 
-class get_open_classes(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class get_open_classes:
     """
     This method returns all of the classes that are currently open for
     registration
@@ -85,7 +91,8 @@ class get_open_classes(APIView):
         return Response(params, params.get("status", 200))
 
 
-class enrolled(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class enrolled:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id):
@@ -116,7 +123,8 @@ class enrolled(APIView):
         return Response(params, params["status"])
 
 
-class enroll(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class enroll:
     permission_classes = (IsAuthenticated,)
 
     # Modify to post, bring in passcode, figure out why teaches_class
@@ -187,7 +195,8 @@ class enroll(APIView):
         return Response(params, params["status"])
 
 
-class get_class(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class get_class:
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, class_id):
@@ -229,7 +238,8 @@ class get_class(APIView):
 ################################################################################
 
 
-class create_class(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class create_class:
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     def post(self, request):
@@ -248,7 +258,8 @@ class create_class(APIView):
         return Response(params, status=params.get("status", 200))
 
 
-class list_classes(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class list_classes:
     """
     This method returns all of the classes. This is an Admin Only Feature
     """
@@ -270,7 +281,8 @@ class list_classes(APIView):
         return Response(params, params.get("status", 200))
 
 
-class update_class(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class update_class:
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     def post(self, request):
@@ -302,7 +314,8 @@ class update_class(APIView):
         return Response(params, status=params.get("status", 200))
 
 
-class delete_class(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class delete_class:
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     def delete(self, request, class_id):

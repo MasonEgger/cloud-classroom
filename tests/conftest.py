@@ -58,7 +58,19 @@ class ProfileFactory(DjangoModelFactory):
         model = Profile
     
     user = SubFactory(UserFactory)
-    ssh_key = Faker("text", max_nb_chars=200)
+    ssh_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCgWTbgWhRBUbelv5+9UKJsJh3FZQ0FT+F3ff1PtuSGfb0a+/QCycDv74AOECaEFbCSoFepS16ECYY1/8yGKB2iu+eN8JqKwAVZAc3JKjCsRQ4Fyy4ziuVeWfsgv7cO8Mb8V9R9F6uSsSmmiqNTlM1sf36AJYQIi57W0LDY775yLQTawCQGt8pFQbXXEL138K2vd0Lq4G/i75sHW5b3IGHRQ0dosHV2bV107usqAHjYl4C63pTsNovePztzjyC7lwy0zDxAX43KOckcE/yZCfRjxKWvk6z6nf5mgK59pHucgykB3IJ2p1NpcfKf1dgEAgpzZT2mH+Ji8j09967UTbxt test@example.com"
+    
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Override to handle auto-created profiles."""
+        user = kwargs.get('user')
+        if user and hasattr(user, 'profile'):
+            # Update existing profile instead of creating new one
+            profile = user.profile
+            profile.ssh_key = kwargs.get('ssh_key', cls.ssh_key)
+            profile.save()
+            return profile
+        return super()._create(model_class, *args, **kwargs)
 
 
 class TeacherFactory(DjangoModelFactory):
@@ -68,6 +80,7 @@ class TeacherFactory(DjangoModelFactory):
         model = Teacher
     
     user = SubFactory(UserFactory)
+    droplet_limit = 10
 
 
 class StudentFactory(DjangoModelFactory):
@@ -112,6 +125,39 @@ class DropletFactory(DjangoModelFactory):
     owner = SubFactory(UserFactory)
 
 
+class WorkshopCodeFactory(DjangoModelFactory):
+    """Factory for creating WorkshopCode instances."""
+    
+    class Meta:
+        model = 'authentication.WorkshopCode'
+    
+    code = Faker("lexify", text="????????", letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    name = Faker("text", max_nb_chars=50)
+    description = Faker("text", max_nb_chars=200)
+    created_by = SubFactory(UserFactory)
+    class_link = SubFactory(ClassFactory)
+
+
+# Additional fixtures for API testing
+@pytest.fixture
+def api_client():
+    """Provide authenticated API client."""
+    from rest_framework.test import APIClient
+    return APIClient()
+
+
+@pytest.fixture
+def mock_digitalocean_manager():
+    """Provide mock DigitalOcean manager."""
+    return MagicMock()
+
+
+@pytest.fixture
+def mock_classroom_service():
+    """Provide mock ClassroomService."""
+    return AsyncMock()
+
+
 # Pytest fixtures
 @pytest.fixture
 def user_factory():
@@ -147,6 +193,12 @@ def class_factory():
 def droplet_factory():
     """Provide DropletFactory."""
     return DropletFactory
+
+
+@pytest.fixture
+def workshop_code_factory():
+    """Provide WorkshopCodeFactory."""
+    return WorkshopCodeFactory
 
 
 @pytest.fixture

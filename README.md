@@ -19,18 +19,26 @@ Cloud Classroom solves these problems by providing a secure, controlled environm
 
 ## ✨ Key Features
 
+### 🎓 Workshop Mode (Perfect for Single-Day Events)
+- **Quick Registration** - Students enter a workshop code to register instantly
+- **No Email Required** - Skip email verification for immediate access
+- **Instructor Approval** - Teachers approve registrations from admin panel
+- **Zero Setup** - Students can walk in and be online in minutes
+
 ### For Teachers
-- 🏫 **Class Management** - Create and manage multiple classes with different configurations
+- 🏫 **Flexible Class Management** - Single workshop or multi-class configurations
 - 👥 **Student Oversight** - Monitor all student droplets and resource usage
 - 💰 **Cost Control** - Set limits on droplet sizes, regions, and quantities per student
 - 🔐 **SSH Key Management** - Automatically inject teacher SSH keys for support and oversight
 - 📊 **Usage Analytics** - Track resource usage across all classes and students
+- 🎫 **Workshop Codes** - Generate unique codes for workshop registration
 
 ### For Students
 - 💻 **Easy Droplet Management** - Create, start, stop, and delete virtual machines with one click
 - 🔗 **Instant Access** - Get SSH credentials and connection info immediately
 - 🎓 **Class-Based Resources** - Access droplets configured specifically for each class
 - 📱 **Mobile-Friendly** - Responsive interface works on all devices
+- ⚡ **Quick Registration** - Enter workshop code and start using cloud resources
 
 ### Technical Highlights
 - ⚡ **Modern Stack** - Django 5.0, HTMX, Tailwind CSS, and async Python
@@ -38,6 +46,7 @@ Cloud Classroom solves these problems by providing a secure, controlled environm
 - 🚀 **Real-Time Updates** - HTMX-powered interface with no page reloads
 - 🌐 **Async Operations** - Modern aiohttp-based DigitalOcean API client
 - 🧪 **Well Tested** - Comprehensive test suite with async support
+- 🎛️ **Configurable Authentication** - Workshop codes or email-based registration
 
 ## 🚀 Quick Start
 
@@ -63,6 +72,15 @@ Cloud Classroom solves these problems by providing a secure, controlled environm
    uv sync
    ```
 
+   > ⚠️ **IMPORTANT for DEBUG mode**: If you plan to run with `DEBUG=True` (default for development), you MUST install development dependencies to avoid import errors:
+   > ```bash
+   > uv sync --extra dev
+   > # OR alternatively:
+   > # uv pip install -e ".[dev]"
+   > ```
+   > 
+   > **Why?** When `DEBUG=True`, Django includes development-only packages like `django-silk`, `debug-toolbar`, and `django-browser-reload` in `INSTALLED_APPS`. Without the dev dependencies, you'll get `ModuleNotFoundError` when running `uv run python manage.py` commands.
+
 3. **Configure environment variables**
    ```bash
    cp env.example .env
@@ -70,29 +88,33 @@ Cloud Classroom solves these problems by providing a secure, controlled environm
    ```
 
 4. **Required environment variables**
-   ```bash
+   ```
    # Django Configuration
    DJANGO_SECRET_KEY=your-secret-key-here
    DEBUG=True
    DEVELOPMENT_MODE=True
    DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
    
+   # Workshop Mode Settings (perfect for single-day workshops)
+   SIMPLE_AUTH_MODE=True   # Use workshop codes instead of email verification
+   MULTI_CLASS_MODE=False  # Single class for all participants
+   
    # DigitalOcean API
    DO_TOKEN=your-digitalocean-api-token
    
    # Database (optional - uses SQLite by default in dev)
-   DB_NAME=cloud_classroom
-   DB_USER=postgres
-   DB_PASSWORD=your-password
-   DB_HOST=localhost
-   DB_PORT=5432
+   # DB_NAME=cloud_classroom
+   # DB_USER=postgres
+   # DB_PASSWORD=your-password
+   # DB_HOST=localhost
+   # DB_PORT=5432
    
    # Email Configuration (optional for development)
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=587
-   EMAIL_USE_TLS=True
-   EMAIL_HOST_USER=your-email@gmail.com
-   EMAIL_HOST_PASSWORD=your-app-password
+   # EMAIL_HOST=smtp.gmail.com
+   # EMAIL_PORT=587
+   # EMAIL_USE_TLS=True
+   # EMAIL_HOST_USER=your-email@gmail.com
+   # EMAIL_HOST_PASSWORD=your-app-password
    ```
 
 5. **Initialize the database**
@@ -100,6 +122,11 @@ Cloud Classroom solves these problems by providing a secure, controlled environm
    uv run python manage.py migrate
    uv run python manage.py createsuperuser
    ```
+   
+   > 💡 **Troubleshooting**: If you get a `ModuleNotFoundError` (like `No module named 'silk'`), you need to install development dependencies first:
+   > ```bash
+   > uv sync --extra dev
+   > ```
 
 6. **Start the development server**
    ```bash
@@ -111,9 +138,93 @@ Cloud Classroom solves these problems by providing a secure, controlled environm
    - Sign up for an account or use the superuser account
    - Configure your first class in the Django admin
 
+## 🎓 Workshop Mode Guide (Recommended for Single-Day Events)
+
+Cloud Classroom defaults to **Workshop Mode** - perfect for workshops, bootcamps, and single-day events where you need students online quickly without email verification.
+
+### Quick Workshop Setup (5 minutes)
+
+1. **Start the server**
+   ```bash
+   uv run python manage.py runserver
+   ```
+
+2. **Create admin account** (if not done already)
+   ```bash
+   uv run python manage.py createsuperuser
+   ```
+
+3. **Create workshop code**
+   - Go to http://127.0.0.1:8000/admin/
+   - Navigate to **Authentication > Workshop codes**
+   - Click **Add workshop code**
+   - Enter workshop name (e.g., "Cloud Computing Workshop")
+   - Save (code will be auto-generated)
+
+4. **Share the code**
+   - Copy the generated code (e.g., `ABC123XY`)
+   - Share with participants in the room
+
+5. **Students register**
+   - Students visit http://127.0.0.1:8000/register/
+   - Enter workshop code + their name
+   - Account created instantly (pending approval)
+
+6. **Approve participants**
+   - Go to **Users > Users** in admin
+   - Filter by "Registration method: Workshop code"
+   - Select pending users and choose "Approve selected workshop users"
+   - Students can now login and create droplets!
+
+### Workshop Mode Features
+
+#### 🎯 **Simple Registration**
+- Students enter: Workshop code + Name + Preferred username
+- No email verification required
+- Accounts created instantly but require approval
+
+#### ⚡ **Instructor Control**
+- Generate unique workshop codes for each event
+- Set participant limits and expiration times
+- Bulk approve/reject registrations
+- Monitor workshop statistics
+
+#### 🏫 **Flexible Class Management**
+Two modes available:
+
+**Single Class Mode** (default - `MULTI_CLASS_MODE=False`):
+- All participants join one default class
+- Perfect for single workshops
+- Simplified management
+
+**Multi-Class Mode** (`MULTI_CLASS_MODE=True`):
+- Multiple instructors can run separate workshops
+- Each workshop code links to a specific class
+- Isolated participant groups
+
+### Switching Between Modes
+
+Edit your `.env` file to change behavior:
+
+```bash
+# Simple Workshop (default)
+SIMPLE_AUTH_MODE=True   # Workshop codes
+MULTI_CLASS_MODE=False  # Single class
+
+# Multi-Instructor Workshop
+SIMPLE_AUTH_MODE=True   # Workshop codes
+MULTI_CLASS_MODE=True   # Multiple classes
+
+# Email-Based Registration
+SIMPLE_AUTH_MODE=False  # Email verification
+MULTI_CLASS_MODE=False  # Single class (or True for multi-class)
+```
+
 ## 📚 User Guide
 
-### For Teachers
+> 💡 **Quick Start**: For single-day workshops, use the [Workshop Mode Guide](#-workshop-mode-guide-recommended-for-single-day-events) above instead of this section.
+
+### For Teachers (Email-Based Registration Mode)
 
 #### Setting Up Your First Class
 
@@ -197,6 +308,8 @@ Cloud Classroom uses a modern Python web development stack:
    ```bash
    uv sync --extra dev
    ```
+   
+   > ⚠️ **Required for DEBUG mode**: Development dependencies are REQUIRED when running with `DEBUG=True` (default). The Django settings include dev-only apps like `django-silk` and `debug-toolbar` that will cause import errors without these dependencies.
 
 2. **Run tests**
    ```bash

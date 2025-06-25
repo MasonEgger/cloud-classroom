@@ -17,21 +17,37 @@ import os
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env file if it exists
+# Environment variables take precedence over .env file values
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    load_dotenv(env_file)
+
+# Helper function to parse boolean environment variables
+def get_env_bool(key: str, default: bool = False) -> bool:
+    value = os.getenv(key, str(default)).lower()
+    return value in ('true', '1', 'yes', 'on')
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = get_env_bool('DEBUG', False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', get_random_secret_key())
 
 # Development mode flag
-DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False").lower() == "true"
+DEVELOPMENT_MODE = get_env_bool('DEVELOPMENT_MODE', False)
+
+# Workshop mode settings
+SIMPLE_AUTH_MODE = get_env_bool('SIMPLE_AUTH_MODE', True)
+MULTI_CLASS_MODE = get_env_bool('MULTI_CLASS_MODE', False)
 
 # Allowed hosts
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Logging Configuration
 
@@ -41,7 +57,7 @@ LOGGING_CONFIG = None
 
 # Get loglevel from env
 
-LOGLEVEL = os.getenv("DJANGO_LOGLEVEL", "info").upper()
+LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
 
 logging.config.dictConfig(
     {
@@ -117,11 +133,25 @@ AUTHENTICATION_BACKENDS = [
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 CRISPY_TEMPLATE_PACK = "tailwind"
 
-# Django-allauth configuration
-ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# Django-allauth configuration (conditional based on SIMPLE_AUTH_MODE)
+# Common allauth settings - Updated for modern allauth
+ACCOUNT_LOGIN_METHODS = {"email"}  # Replaces deprecated ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]  # Replaces deprecated EMAIL_REQUIRED/USERNAME_REQUIRED
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None  # Critical: No username field in our User model
 ACCOUNT_UNIQUE_EMAIL = True
+
+# Custom signup form to handle email-only registration
+ACCOUNT_FORMS = {
+    'signup': 'authentication.allauth_forms.EmailSignupForm',
+}
+
+if SIMPLE_AUTH_MODE:
+    # Simple workshop authentication - no email verification required
+    ACCOUNT_EMAIL_VERIFICATION = "none"  # Disable email verification in workshop mode
+else:
+    # Standard authentication with email verification
+    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -183,11 +213,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("DB_NAME"),
-            "USER": os.environ.get("DB_USER"),
-            "PASSWORD": os.environ.get("DB_PASSWORD"),
-            "HOST": os.environ.get("DB_HOST"),
-            "PORT": os.environ.get("DB_PORT"),
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT"),
             "OPTIONS": {"sslmode": "require"},
         }
     }
@@ -261,7 +291,7 @@ DO_TOKEN = os.getenv("DO_TOKEN", "")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Security settings
-if not DEBUG:
+if not DEBUG and not DEVELOPMENT_MODE:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -286,10 +316,7 @@ if DEBUG:
 TAILWIND_APP_NAME = "theme"
 TAILWIND_CSS_PATH = "css/dist/styles.css"
 
-# Internal IPs for django-browser-reload in development
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
+# NOTE: INTERNAL_IPS already defined above in DEBUG section
 
 # NPM binary path (for Tailwind)
 NPM_BIN_PATH = "npm"
@@ -316,3 +343,5 @@ if not DEBUG:
             "handlers": ["console"],
         },
     }
+
+# NOTE: DO_TOKEN already defined at line 287

@@ -1,12 +1,15 @@
+# DEPRECATED: Legacy DRF views - replaced by HTMX views in classroom app
+# WARNING: These views are missing DRF imports and will fail if executed
+# TODO: Remove entire file once classroom app migration is complete
+
+# Missing imports that would be needed if these views were to function:
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.response import Response
+# from rest_framework.views import APIView
+
 import re
-
-import digitalocean
+import digitalocean  # NOTE: This uses deprecated python-digitalocean library
 from django.conf import settings
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-
-# local imports
-from rest_framework.views import APIView
 
 # model imports
 
@@ -16,7 +19,8 @@ re_slug = re.compile("^(centos|debian|fedora|ubuntu).+x64$")
 # Create your views here.
 
 
-class list_resources(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class list_resources:
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

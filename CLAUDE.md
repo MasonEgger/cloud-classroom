@@ -10,13 +10,14 @@ Cloud Classroom is a Django-based web application that acts as a proxy between D
 
 ## Tech Stack
 - Python 3.12+ (updated from 3.8.5)
-- Django 5.0+ (upgrading from 3.1.12)
+- Django 5.0+ (upgraded from 3.1.12) 
 - HTMX + Alpine.js for frontend interactivity
-- Tailwind CSS for styling
+- Tailwind CSS for styling (via django-tailwind)
 - PostgreSQL for production, SQLite for development
-- aiohttp for async DigitalOcean API calls (replacing python-digitalocean)
-- Temporal for workflow orchestration
-- uv for package management (replacing pip)
+- aiohttp for async DigitalOcean API calls (modern async client in `services/digitalocean.py`)
+- Pydantic for data validation and modeling
+- Structlog for structured logging
+- uv for package management (replaces pip)
 
 ## Development Commands
 
@@ -33,8 +34,9 @@ uv pip sync
 # Install development dependencies
 uv pip install -e ".[dev]"
 
-# Load environment variables
+# Load environment variables (optional - .env file is loaded automatically)
 export $(grep -v '^#' env | xargs)
+# OR create a .env file in the project root (recommended)
 
 # Run migrations
 uv run python manage.py migrate
@@ -42,7 +44,7 @@ uv run python manage.py migrate
 # Create superuser
 uv run python manage.py createsuperuser
 
-# Populate development data (Harry Potter themed)
+# Populate development data (Pokemon themed)
 uv run python manage.py shell < development_db_data.py
 ```
 
@@ -104,21 +106,23 @@ python manage.py showmigrations
 
 ### Django Apps Structure
 - **users**: Core user model with role-based access (Admin/Teacher, Student)
-- **auth**: Authentication endpoints for login/logout
+- **authentication**: Authentication views and forms for login/logout
 - **classes**: Classroom management with resource constraints (droplet limits, sizes, regions)
 - **students**: Student management and registration
 - **teachers**: Teacher management functionality
 - **droplet**: DigitalOcean droplet lifecycle management with cloud-init integration
 - **resources**: Available DO resources (sizes, regions, images)
+- **classroom**: Main classroom management app with HTMX-powered views
+- **services**: Async service layer (`digitalocean.py`, `classroom.py`)
+- **theme**: Tailwind CSS theme configuration
 
-### API Structure
-- `/auth/` - Authentication (login, logout, token management)
-- `/droplets/` - Droplet CRUD operations
-- `/classes/` - Class management endpoints
-- `/resources/` - DO resource listings
-- `/users/` - User management
-- `/` - Swagger API documentation
-- `/schema/` - OpenAPI schema
+### URL Structure
+- `/accounts/` - Django-allauth authentication (login, logout, signup)
+- `/auth/` - Custom authentication views
+- `/classroom/` - Main classroom management interface (HTMX-powered)
+- `/admin/` - Django admin interface
+- `/` - Home page
+- **Note**: Some legacy API endpoints are commented out during modernization (droplets, classes, resources, users)
 
 ### Key Features
 1. **Multi-tenancy**: Each class has a unique prefix for DO resources
@@ -126,14 +130,26 @@ python manage.py showmigrations
 3. **Automated Provisioning**: Cloud-init scripts for droplet configuration
 4. **SSH Key Management**: Automatic injection of teacher SSH keys into student droplets
 5. **Password Generation**: Secure passwords for droplet access
+6. **Async Operations**: Modern async service layer for DigitalOcean API calls
+7. **HTMX Interface**: Dynamic UI without complex JavaScript
+8. **Structured Logging**: Comprehensive logging with structlog
 
-### Environment Variables Required
+### Environment Variables
+
+The application automatically loads environment variables from a `.env` file in the project root. Environment variables set in the shell take precedence over `.env` file values.
+
+Create a `.env` file in the project root with the following variables:
+
 ```bash
 # Django settings
 DJANGO_SECRET_KEY=<secret_key>
 DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
 DEBUG=True  # Set to False in production
 DEVELOPMENT_MODE=True  # Use SQLite when True, PostgreSQL when False
+
+# Workshop Mode Settings
+SIMPLE_AUTH_MODE=True  # Enable workshop code registration (default: True)
+MULTI_CLASS_MODE=False  # Enable multi-class management (default: False)
 
 # PostgreSQL (when not in development mode)
 DB_NAME=<database_name>
@@ -146,29 +162,104 @@ DB_PORT=<database_port>
 DO_TOKEN=<digitalocean_api_token>
 ```
 
+**Environment Variable Precedence:**
+1. Shell environment variables (highest priority)
+2. `.env` file values
+3. Default values defined in settings.py (lowest priority)
+
 ## Development Notes
 
-1. **Authentication**: Uses DRF TokenAuthentication, BasicAuthentication, and SessionAuthentication
-2. **API Documentation**: Available at root URL `/` using drf-spectacular with Swagger UI
+1. **Authentication**: Uses django-allauth for modern authentication with session support
+2. **Frontend**: HTMX + Tailwind CSS with server-side rendering
 3. **Database**: SQLite for development (DEVELOPMENT_MODE=True), PostgreSQL for production
-4. **Static Files**: Swagger documentation in `/swagger-docs/`
-5. **Test Structure**: Test files exist in each app but are currently empty stubs
+4. **Async Services**: Modern async DigitalOcean client in `services/digitalocean.py`
+5. **Service Layer**: `ClassroomService` in `services/classroom.py` orchestrates droplet operations
+6. **Test Structure**: Pytest-based testing with async support
+7. **Development Data**: Pokemon-themed sample data in `development_db_data.py`
 
 ## Common Development Tasks
 
-### Adding New API Endpoints
-1. Create views in the appropriate app's `views.py`
-2. Add serializers in `serializers.py`
+### Adding New Views/Pages
+1. Create HTMX-powered views in the appropriate app's `views.py`
+2. Add templates in `templates/` directory
 3. Update URLs in the app's `urls.py`
 4. Include app URLs in main `do_classroom/urls.py`
 
 ### Working with DigitalOcean Integration
-- DO API client is initialized in views using environment variable `DO_TOKEN`
-- Droplet management includes create, list, delete, and action operations
-- Cloud-init scripts are used for automated droplet configuration
+- Use the async `DigitalOceanClient` in `services/digitalocean.py`
+- High-level operations available in `ClassroomService` in `services/classroom.py`
+- Example: `async with ClassroomService() as service: await service.create_droplet_for_student(class_obj, student)`
+- All droplet operations are async and include proper error handling
 
 ### Database Schema Updates
 1. Make changes to models in the appropriate app
-2. Run `python manage.py makemigrations`
+2. Run `uv run python manage.py makemigrations`
 3. Review generated migration files
-4. Apply with `python manage.py migrate`
+4. Apply with `uv run python manage.py migrate`
+
+### Working with Async Views
+- Django 5.0 supports async views natively
+- Use `asgiref.sync.sync_to_async` to call sync Django ORM operations from async code
+- Service layer handles async DigitalOcean operations properly
+
+## Workshop Mode Configuration
+
+The system supports two independent settings for flexible deployment scenarios:
+
+### SIMPLE_AUTH_MODE (default: True)
+Controls authentication method:
+- **True**: Workshop code registration - users enter a code provided by instructor
+- **False**: Email-based registration with verification
+
+### MULTI_CLASS_MODE (default: False)  
+Controls class management complexity:
+- **False**: Single default class - all users join one class automatically
+- **True**: Multi-class system - teachers can create/manage individual classes
+
+### Four Deployment Modes
+
+1. **Simple Workshop** (`SIMPLE_AUTH_MODE=True`, `MULTI_CLASS_MODE=False`)
+   - Workshop codes for registration
+   - Single default class for all participants
+   - Perfect for single-day workshops
+
+2. **Multi-Instructor Workshop** (`SIMPLE_AUTH_MODE=True`, `MULTI_CLASS_MODE=True`)
+   - Workshop codes for registration
+   - Multiple classes with different instructors
+   - Each instructor manages their own participants
+
+3. **Simple School** (`SIMPLE_AUTH_MODE=False`, `MULTI_CLASS_MODE=False`)
+   - Email verification registration
+   - Single default class
+
+4. **Full Production** (`SIMPLE_AUTH_MODE=False`, `MULTI_CLASS_MODE=True`)
+   - Email verification registration
+   - Full class management system
+
+### Workshop Registration Flow
+
+**For Students:**
+1. Visit `/auth/workshop/register/` or `/register/` (redirects in workshop mode)
+2. Enter workshop code + basic info (name, preferred username)
+3. Account created in "pending approval" state
+4. Can't login until instructor approves
+
+**For Instructors:**
+1. Create workshop code in Django admin (`/admin/authentication/workshopcode/`)
+2. Share code with participants
+3. Review pending registrations in user admin (`/admin/users/user/`)
+4. Bulk approve legitimate participants
+5. Students can then login and access resources
+
+### Workshop Code Management
+
+Workshop codes include:
+- Unique 8-character alphanumeric code (auto-generated)
+- Workshop name and description
+- Optional registration limits and expiration
+- Link to specific class (when `MULTI_CLASS_MODE=True`)
+
+Admin features:
+- Bulk approval/rejection of workshop users
+- Workshop statistics and registration tracking
+- Automatic code generation and management

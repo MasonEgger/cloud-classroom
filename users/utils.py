@@ -44,11 +44,12 @@ def get_user_role(user, class_obj=None):
     (True, dict), where the dict returns the user object as well as boolean
     attributes describing if the user `is_teacher` and `is_student`.
     """
-    # TODO: Deprecate user key and switch to student/teacher object model
+    # NOTE: This function returns both legacy 'user' key and new object model
+    # The 'user' key is kept for backwards compatibility during migration
     results = {
         "is_student": False,
         "is_teacher": False,
-        "user": None,
+        "user": None,  # Legacy: use teacher_object/student_object instead
         "teacher_object": None,
         "student_object": None,
         "teaches_class": False,

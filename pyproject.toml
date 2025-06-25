@@ -50,6 +50,8 @@ dependencies = [
     "temporalio>=1.4", # Temporal workflow engine
     "django-environ>=0.11", # Environment variables
     "cookiecutter>=2.6.0",
+    "xkcdpass>=1.19.8", # Password generation
+    "python-dotenv>=1.0.0", # Environment file loading
 ]
 
 [project.optional-dependencies]

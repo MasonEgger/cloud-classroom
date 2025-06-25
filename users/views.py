@@ -1,8 +1,14 @@
+# DEPRECATED: Legacy DRF views - replaced by HTMX views in classroom app
+# WARNING: These views are missing DRF imports and will fail if executed
+# TODO: Remove entire file once classroom app migration is complete
+
+# Missing imports that would be needed if these views were to function:
+# from rest_framework.authtoken.models import Token
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.response import Response
+# from rest_framework.views import APIView
+
 from django.db.utils import IntegrityError
-from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from classes.models import Class
 from droplet.models import Droplet
@@ -13,7 +19,8 @@ from users.models import User
 # Create your views here.
 
 
-class view(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class view:
     """
     Create a droplet
     """
@@ -65,7 +72,8 @@ class view(APIView):
         return Response(params, status=params["status"])
 
 
-class register(APIView):
+# LEGACY: This class is unused - replaced by classroom views
+class register:
     """
     Create a droplet
     """

@@ -1,23 +1,22 @@
-
-# from droplet.models import Droplet
+# LEGACY: This file is deprecated - use services/digitalocean.py instead
+# TODO: Remove after migrating remaining functions to services layer
 
 import crypt
-import json
 
-import digitalocean
-import requests
 import xkcdpass.xkcd_password as xp
 
-API_URL_BASE = "https://api.digitalocean.com/v2/"
-HEADERS_STRING = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer {0}",
-}
+# LEGACY: These constants are unused - modern client handles API calls
 
 
 def hashpwd(pwd):
-    # TODO: This salt should be generated at install time and stored somewhere
-    # Not hardcoded
+    """
+    Hash a password using crypt.
+    
+    NOTE: This function uses a hardcoded salt for backwards compatibility.
+    In production, consider using Django's password hashing instead.
+    """
+    # Using hardcoded salt for backwards compatibility with existing droplets
+    # For new implementations, use Django's make_password() function
     hashed_pwd = crypt.crypt(pwd, "$6$saltsalt$")
 
     return hashed_pwd
@@ -31,83 +30,46 @@ def mkpasswd():
     return pwd.lower()
 
 
+# LEGACY: Replaced by DigitalOceanClient.list_regions()
 def list_regions(token):
-    manager = digitalocean.Manager(token=token)
-    all_regions = manager.get_all_regions()
-
-    regions = []
-    for r in all_regions:
-        if "metadata" in r.features:
-            regions.append((r.slug, r.name))
-
-    return regions
+    # Use services.digitalocean.DigitalOceanClient instead
+    pass
 
 
+# LEGACY: Replaced by DigitalOceanClient.list_sizes()
 def list_sizes(token):
-    manager = digitalocean.Manager(token=token)
-    all_sizes = manager.get_all_sizes()
-
-    sizes = []
-    for s in all_sizes:
-        if s.available:
-            sizes.append((s.slug, s.slug))
-
-    return sizes
+    # Use services.digitalocean.DigitalOceanClient instead
+    pass
 
 
+# LEGACY: Replaced by DigitalOceanClient.list_images()
 def list_images():
-    """
-    List of available images.
-
-    Some hard coding is needed as images using cloud-init aren't
-    specified in the API.
-    """
-    images = [
-        ("ubuntu-14-04-x64", "Ubuntu 14.04 x64"),
-        ("ubuntu-14-10-x64", "Ubuntu 14.10 x64"),
-        ("ubuntu-15-04-x64", "Ubuntu 15.04 x64"),
-        ("docker", "Docker on Ubuntu 14.04"),
-        ("lamp", "LAMP on Ubuntu 14.04"),
-        ("lemp", "LEMP on Ubuntu 14.04"),
-        ("node", "Node.js on Ubuntu 14.04"),
-        ("mongodb", "MongoDB on Ubuntu 14.04"),
-    ]
-
-    # token = Teacher.objects.get(pk=1).token
-    # manager = digitalocean.Manager(token=token)
-    # all_images = manager.get_app_images()
-    # for i in all_images:
-    #     images.append((i.slug, i.name))
-
-    return images
+    # Use services.digitalocean.DigitalOceanClient instead
+    # These hardcoded images are outdated
+    pass
 
 
+# LEGACY: Replaced by DigitalOceanClient.power_off_droplet()
 def power_off(token, droplet_id):
-    droplet = digitalocean.Droplet(token=token, id=droplet_id)
-    droplet.shutdown()
+    # Use services.digitalocean.DigitalOceanClient instead
+    pass
 
 
+# LEGACY: Replaced by DigitalOceanClient.power_on_droplet()
 def power_on(token, droplet_id):
-    droplet = digitalocean.Droplet(token=token, id=droplet_id)
-    droplet.power_on()
+    # Use services.digitalocean.DigitalOceanClient instead
+    pass
 
 
+# LEGACY: Replaced by DigitalOceanClient.get_droplet()
 def power_status(token, droplet_id):
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {token}",
-    }
-    api_url = f"{API_URL_BASE}droplets/{droplet_id}"
-
-    response = requests.get(api_url, headers=headers)
-
-    if response.status_code == 200:
-        resp = json.loads(response.content.decode("utf-8"))
-        return resp["droplet"]["status"]
-    return None
+    # Use services.digitalocean.DigitalOceanClient instead
+    pass
 
 
+# LEGACY: Replaced by DigitalOceanClient.delete_droplet()
 def destroy(token, droplet_id):
+    # Use services.digitalocean.DigitalOceanClient instead
     pass
 
 
@@ -126,7 +88,9 @@ def destroy(token, droplet_id):
     droplet_obj.delete() """
 
 
+# LEGACY: Replaced by DigitalOceanClient.list_droplets()
 def list_droplets(token, prefix):
+    # Use services.digitalocean.DigitalOceanClient instead
     pass
 
 
@@ -142,7 +106,9 @@ def list_droplets(token, prefix):
     return droplets """
 
 
+# LEGACY: Replaced by ClassroomService.create_droplet_for_student()
 def add_droplet(token, class_obj, owner):
+    # Use services.classroom.ClassroomService instead
     pass
 
 
@@ -212,7 +178,9 @@ def add_droplet(token, class_obj, owner):
     } """
 
 
+# LEGACY: Replaced by ClassroomService.destroy_class_droplets()
 def end_class(token, class_obj):
+    # Use services.classroom.ClassroomService instead
     pass
 
 
@@ -229,6 +197,8 @@ def end_class(token, class_obj):
     class_obj.save() """
 
 
+# NOTE: This cloud-init template is duplicated in droplet/models.py
+# TODO: Consolidate into a single location in services layer
 cloud_config = """
 #cloud-config
 users:
