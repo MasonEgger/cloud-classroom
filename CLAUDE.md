@@ -1,0 +1,3 @@
+- Never use relative imports
+- Always run mypy using --strict
+- Always check for coverage when doing tests and report back on current state of coverage

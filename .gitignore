@@ -6,3 +6,4 @@ env_vars
 .vscode/*
 token.txt
 plan.txt
+*.db
